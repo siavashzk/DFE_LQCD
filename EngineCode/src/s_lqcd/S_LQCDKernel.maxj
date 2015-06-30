@@ -1,0 +1,301 @@
+package s_lqcd;
+
+import com.maxeler.maxcompiler.v0.utils.MathUtils;
+import com.maxeler.maxcompiler.v2.kernelcompiler.Kernel;
+import com.maxeler.maxcompiler.v2.kernelcompiler.KernelParameters;
+import com.maxeler.maxcompiler.v2.kernelcompiler.RoundingMode;
+import com.maxeler.maxcompiler.v2.kernelcompiler.stdlib.core.CounterChain;
+import com.maxeler.maxcompiler.v2.kernelcompiler.types.base.DFEVar;
+import com.maxeler.maxcompiler.v2.kernelcompiler.types.composite.DFEComplex;
+import com.maxeler.maxcompiler.v2.kernelcompiler.types.composite.DFEVector;
+
+class S_LQCDKernel extends Kernel {
+
+	public enum Mode {
+		TIMES, SUB
+	}
+
+	public enum EO {
+		EVENODD, ODDEVEN
+	}
+
+	protected S_LQCDKernel(
+			KernelParameters parameters,
+			int T,
+			int LX,
+			int LY,
+			int LZ,
+			int numPipes,
+			int loopOffset,
+			Mode mode,
+			EO ieo,
+			boolean passGauge
+			)
+	{
+
+		super(parameters);
+
+		QCDConstants constants = new QCDConstants(
+				this,
+				LX,
+				LY,
+				LZ,
+				T,
+				numPipes,
+				loopOffset);
+
+		HalfSpinorBuffer buffer = new HalfSpinorBuffer(constants);
+
+		optimization.pushPipeliningFactor(0.1);
+		CounterChain tickChain = control.count.makeCounterChain();
+		DFEVar tick = tickChain.addCounter(
+				( 8 * (T+2)*LZ*LY*LX/2) + 8*loopOffset + 2,
+				1);
+
+		DFEVar writeChainEnable = tick < ( 8*(T+2)*LZ*LY*LX/2 ) ;
+		DFEVar readChainEnable  = tick > ( 8*2*LZ*LY*LX/2 + 8*loopOffset + 1) ;
+
+
+		CounterChain writeChain = control.count.makeCounterChain(writeChainEnable);
+		DFEVar t = writeChain.addCounter(T+2, 1);
+		DFEVar z = writeChain.addCounter(LZ, 1);
+		DFEVar y = writeChain.addCounter(LY, 1);
+		DFEVar x = writeChain.addCounter(LX/2, 1);
+		DFEVar mu = writeChain.addCounter(8, 1);
+
+		DFEVar isOddRow = (t&1).cast(dfeBool()) ^
+		                  (x&1).cast(dfeBool()) ^
+		                  (y&1).cast(dfeBool()) ;
+		if (ieo == EO.EVENODD) isOddRow = isOddRow ^ 1;
+
+		DFEVector<DFEComplex> spinor_in =
+			io.input(
+				parameters.getName()+"_spinor_in",
+				QCDConstants.getVectoredSpinorType(),
+				writeChainEnable & (mu===0)
+				);
+		DFEVector<DFEComplex> gauge0_in =
+			io.input(
+					parameters.getName()+"_gauge0",
+					QCDConstants.getVectoredSu3Type(),
+					writeChainEnable & ((mu&1)===0) );
+		DFEVector<DFEComplex> gauge1_in =
+			io.input(
+					parameters.getName()+"_gauge1",
+					QCDConstants.getVectoredSu3Type(),
+					writeChainEnable & ((mu&1)===1));
+
+		/*DFEVector<DFEComplex> p_spinor_in = null;
+		if (mode == Mode.SUB ) {
+			p_spinor_in = io.input(
+			parameters.getName()+"_p_spinor_in",
+			DFESpinor.getDFESpinorType(),
+			~isOnBoundary);
+		}*/
+
+		/*DFEVar cfactor_r = io.scalarInput("cfactor", dfeFloat(8,24) );
+		DFEVar ka0_r     = io.scalarInput("ka0", dfeFloat(8,24) );
+		DFEVar ka1_r     = io.scalarInput("ka1", dfeFloat(8,24) );
+		DFEVar ka2_r     = io.scalarInput("ka2", dfeFloat(8,24) );
+		DFEVar ka3_r     = io.scalarInput("ka3", dfeFloat(8,24) );
+
+		DFEComplex cfactor = QCDConstants.dataType.newInstance(this);
+		cfactor.setReal(cfactor_r);
+		cfactor.setImaginary(constant.var(dfeFloat(8,24),0));
+		DFEComplex ka0 = QCDConstants.dataType.newInstance(this);
+		ka0.setReal(ka0_r);
+		ka0.setImaginary(constant.var(dfeFloat(8,24),0));
+		DFEComplex ka1 = QCDConstants.dataType.newInstance(this);
+		ka1.setReal(ka1_r);
+		ka1.setImaginary(constant.var(dfeFloat(8,24),0));
+		DFEComplex ka2 = QCDConstants.dataType.newInstance(this);
+		ka2.setReal(ka2_r);
+		ka2.setImaginary(constant.var(dfeFloat(8,24),0));
+		DFEComplex ka3 = QCDConstants.dataType.newInstance(this);
+		ka3.setReal(ka3_r);
+		ka3.setImaginary(constant.var(dfeFloat(8,24),0));*/
+
+		DFESpinor k = new DFESpinor(constants, spinor_in);
+		DFESu3 gauge0 = new DFESu3(constants, gauge0_in);
+		DFESu3 gauge1 = new DFESu3(constants, gauge1_in);
+		//DFESpinor p = null;
+		/*if (mode == Mode.SUB ) {
+			p = new DFESpinor(this, p_spinor_in);
+		}*/
+
+		DFESu3Vector alpha, beta;
+		DFESu3Vector psi;
+		DFESu3 g;
+
+		DFEHalfSpinor phi = new DFEHalfSpinor(constants);
+
+		DFEQCDSelector isForward = new DFEQCDSelector( constants, (mu & 1) === 1 );
+		DFEQCDSelector dir02     = new DFEQCDSelector( constants, (mu & 2) !== 2 );
+		DFEQCDSelector dir23     = new DFEQCDSelector( constants, mu >= 4 );
+		DFEQCDSelector mu1257    = new DFEQCDSelector( constants, mu===1 | mu===2 | mu===5 | mu===7 );
+		DFEQCDSelector mu1347    = new DFEQCDSelector( constants, mu===1 | mu===3 | mu===4 | mu===7 );
+
+		alpha  = k.s0;
+		beta   = dir23  ? k.s2 : k.s3 ;
+		beta   = mu1257 ? -beta : beta ;
+		beta   = dir02  ? beta.mult_i() : beta ;
+		psi    = alpha + beta;
+		g      = isForward ? gauge1.transpose() : gauge0.conjugate() ;
+		phi.s0 = g * psi;
+		//ka     = isForward ? ka0 : ka0.conjugate();
+		//phi.s0 = chi2.times_complex(ka);
+
+		/*debug.simPrintf(
+				t !== 0 & t !== T+1 ,
+				"dfe pre %f %f %f %f %f %f\n",
+				phi.s0.c0.getReal(),
+				phi.s0.c0.getImaginary(),
+				phi.s0.c1.getReal(),
+				phi.s0.c1.getImaginary(),
+				phi.s0.c2.getReal(),
+				phi.s0.c2.getImaginary());*/
+
+
+		alpha  = k.s1;
+		beta   = dir23  ? k.s3 : k.s2 ;
+		beta   = mu1347 ? -beta : beta ;
+		beta   = dir02  ? beta.mult_i() : beta ;
+		psi    = alpha + beta;
+		g      = isForward ? gauge1.transpose() : gauge0.conjugate() ;
+		phi.s1 = g * psi;
+
+		buffer.setBufferIn(phi);
+		buffer.setWriteCoordinates(t, z, y, x, mu);
+
+		DFEVar loopOffset_ = constant.var(
+				dfeUInt(MathUtils.bitsToRepresent(loopOffset)),
+				loopOffset
+				);
+		DFEVar LXH_ = constant.var(
+				dfeUInt( MathUtils.bitsToRepresent(LX/2)),
+				LX/2
+				);
+
+		CounterChain chain2 = control.count.makeCounterChain(readChainEnable);
+		DFEVar tr  = chain2.addCounter(T, 1);
+		DFEVar zr  = chain2.addCounter(LZ, 1);
+		DFEVar yxr  = (LY*LX/2 > loopOffset) ?
+					chain2.addCounter(LY*LX/2/loopOffset, 1) : constant.var(0);
+		DFEVar mur = chain2.addCounter(8, 1);
+		DFEVar yxrloop = chain2.addCounter(loopOffset, 1);
+
+		optimization.pushEnableBitGrowth(true);
+		optimization.pushRoundingMode(RoundingMode.TRUNCATE);
+
+		yxr = yxr * loopOffset_ + yxrloop;
+		DFEVar yr = (yxr / (LXH_))
+		            .cast(dfeUInt(MathUtils.bitsToAddress(LY)));
+		DFEVar xr = (yxr - yr * LXH_)
+		            .cast(dfeUInt(MathUtils.bitsToAddress(LX/2)));
+
+		optimization.popRoundingMode();
+		optimization.popEnableBitGrowth();
+
+		tr = tr.cast(dfeUInt(MathUtils.bitsToAddress(T+2)));
+		zr = zr.cast(dfeUInt(MathUtils.bitsToAddress(LZ)));
+
+		buffer.setReadCoordinates(tr+1, zr, yr, xr);
+
+		DFEHalfSpinor phiCurr = buffer.getBufferOut(mur);
+
+		/*debug.simPrintf(
+				readChainEnable,
+				"dfe post %f %f\n",
+				phiCurr.s0.c0.getReal(),
+				phiCurr.s0.c0.getImaginary());*/
+
+		/*debug.simPrintf(
+				readChainEnable,
+				"dfe_post %f %f %f %f %f %f\n",
+				phiCurr.s0.c0.getReal(),
+				phiCurr.s0.c0.getImaginary(),
+				phiCurr.s0.c1.getReal(),
+				phiCurr.s0.c1.getImaginary(),
+				phiCurr.s0.c2.getReal(),
+				phiCurr.s0.c2.getImaginary());*/
+
+		DFEQCDSelector newSum = new DFEQCDSelector (constants, mur===0 );
+		DFEQCDSelector acc_dir01 = new DFEQCDSelector (constants, mur<=3 );
+		DFEQCDSelector acc_dir02 = new DFEQCDSelector (constants, (mur&2) !== 2 );
+		DFEQCDSelector acc_mu0347 = new DFEQCDSelector (
+				constants,
+				mur===0 | mur===3 | mur===4 | mur===7
+				);
+		DFEQCDSelector acc_mu0257 = new DFEQCDSelector (
+				constants,
+				mur===0 | mur===2 | mur===5 | mur===7
+				);
+
+		DFESpinor rs = new DFESpinor(constants);
+		rs.newInstant();
+		DFESpinor addend = new DFESpinor(constants);
+		DFESpinor accumulator = new DFESpinor(constants);
+
+		addend.s0 = phiCurr.s0;
+		addend.s1 = phiCurr.s1;
+
+		addend.s2 = acc_dir01 ? phiCurr.s1 : phiCurr.s0 ;
+		addend.s2 = acc_dir02 ? addend.s2.mult_i() : addend.s2 ;
+		addend.s2 = acc_mu0347 ? -addend.s2 : addend.s2 ;
+
+		addend.s3 = acc_dir01 ? phiCurr.s0 : phiCurr.s1 ;
+		addend.s3 = acc_dir02 ? addend.s3.mult_i() : addend.s3 ;
+		addend.s3 = acc_mu0257 ? -addend.s3 : addend.s3 ;
+
+		accumulator = rs.streamoffset(-loopOffset) + addend;
+
+		rs.s0 <== newSum ? phiCurr.s0 : accumulator.s0;
+		rs.s1 <== newSum ? phiCurr.s1 : accumulator.s1;
+		rs.s2 <== newSum ? -phiCurr.s1.mult_i() : accumulator.s2;
+		rs.s3 <== newSum ? -phiCurr.s0.mult_i() : accumulator.s3;
+
+		/*DFESpinor result = new DFESpinor(constants);
+		if (mode == Mode.TIMES) {
+			result.s0 = rs.s0.times_complex(cfactor);
+			result.s1 = rs.s1.times_complex(cfactor);
+			result.s2 = rs.s2.times_complexcjg(cfactor);
+			result.s3 = rs.s3.times_complexcjg(cfactor);
+		} else if (mode == Mode.SUB) {
+			psi = p.s0.times_complex(cfactor);
+			result.s0 = psi.sub(rs.s0);
+			psi2 = p.s1.times_complex(cfactor);
+			result.s1 = psi2.sub(rs.s1);
+			psi = p.s2.times_complexcjg(cfactor);
+			result.s2 = rs.s2.sub(psi);
+			psi2 = p.s3.times_complexcjg(cfactor);
+			result.s3 = rs.s3.sub(psi2);
+		}*/
+		DFEVector<DFEComplex> spinor_out = rs.convertToDFEVector();
+
+		io.output(
+				parameters.getName()+"_spinor_out",
+				spinor_out,
+				QCDConstants.getVectoredSpinorType(),
+				(readChainEnable & (mur===7) )
+				);
+
+		if (passGauge == true) {
+			io.output(
+					parameters.getName()+"_gauge0_out",
+					gauge0_in,
+					QCDConstants.getVectoredSu3Type());
+			io.output(
+					parameters.getName()+"_gauge1_out",
+					gauge1_in,
+					QCDConstants.getVectoredSu3Type());
+			if (mode == Mode.TIMES) {
+				io.output(
+						parameters.getName()+"_p_spinor_out",
+						spinor_in,
+						QCDConstants.getVectoredSpinorType());
+			}
+		}
+
+	}
+
+}

@@ -1,0 +1,62 @@
+package s_lqcd;
+
+import com.maxeler.maxcompiler.v2.kernelcompiler.KernelLib;
+import com.maxeler.maxcompiler.v2.kernelcompiler.types.base.DFEVar;
+import com.maxeler.maxcompiler.v2.kernelcompiler.types.composite.DFEComplex;
+
+public class DFEQCDSelector extends KernelLib {
+
+	private DFEVar selector;
+
+	private final QCDConstants m_constants;
+
+	protected DFEQCDSelector(QCDConstants constants) {
+		super(constants.getKernel());
+		m_constants = constants;
+	}
+
+	protected DFEQCDSelector(QCDConstants constants, DFEVar v) {
+		super(constants.getKernel());
+		m_constants = constants;
+		selector = v;
+	}
+
+	public DFESu3 ternaryIf(DFESu3 a, DFESu3 b) {
+		DFESu3 temp = new DFESu3(m_constants);
+
+		temp.c00 = selector ? a.c00 : b.c00;
+		temp.c01 = selector ? a.c01 : b.c01;
+		temp.c02 = selector ? a.c02 : b.c02;
+		temp.c10 = selector ? a.c10 : b.c10;
+		temp.c11 = selector ? a.c11 : b.c11;
+		temp.c12 = selector ? a.c12 : b.c12;
+		temp.c20 = selector ? a.c20 : b.c20;
+		temp.c21 = selector ? a.c21 : b.c21;
+		temp.c22 = selector ? a.c22 : b.c22;
+
+		return temp;
+	}
+
+	public DFEHalfSpinor ternaryIf(DFEHalfSpinor a, DFEHalfSpinor b) {
+		DFEHalfSpinor temp = new DFEHalfSpinor(m_constants);
+
+		temp.s0 = this ? a.s0 : b.s0;
+		temp.s1 = this ? a.s1 : b.s1;
+
+		return temp;
+	}
+
+	public DFESu3Vector ternaryIf(DFESu3Vector a, DFESu3Vector b) {
+		DFESu3Vector temp = new DFESu3Vector(m_constants);
+
+		temp.c0 = selector ? a.c0 : b.c0;
+		temp.c1 = selector ? a.c1 : b.c1;
+		temp.c2 = selector ? a.c2 : b.c2;
+
+		return temp;
+	}
+
+	public DFEComplex ternaryIf(DFEComplex a, DFEComplex b) {
+		return (selector ? a : b) ;
+	}
+}

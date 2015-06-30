@@ -1,0 +1,118 @@
+package s_lqcd;
+
+import com.maxeler.maxcompiler.v2.kernelcompiler.KernelLib;
+import com.maxeler.maxcompiler.v2.kernelcompiler.types.composite.DFEComplex;
+import com.maxeler.maxcompiler.v2.kernelcompiler.types.composite.DFEComplexType;
+import com.maxeler.maxcompiler.v2.kernelcompiler.types.composite.DFEVector;
+
+public class DFESu3 extends KernelLib  {
+
+	public DFEComplex c00, c01, c02,
+	                  c10, c11, c12,
+	                  c20, c21, c22;
+
+
+	private final QCDConstants m_constants;
+	private final DFEComplexType m_cplxType;
+
+
+
+	protected DFESu3(QCDConstants constants) {
+		super(constants.getKernel());
+		m_constants = constants;
+		m_cplxType = QCDConstants.dataType;
+		c00 = m_cplxType.newInstance(constants.getKernel());
+		c01 = m_cplxType.newInstance(constants.getKernel());
+		c02 = m_cplxType.newInstance(constants.getKernel());
+		c10 = m_cplxType.newInstance(constants.getKernel());
+		c11 = m_cplxType.newInstance(constants.getKernel());
+		c12 = m_cplxType.newInstance(constants.getKernel());
+		c20 = m_cplxType.newInstance(constants.getKernel());
+		c21 = m_cplxType.newInstance(constants.getKernel());
+		c22 = m_cplxType.newInstance(constants.getKernel());
+	}
+
+	protected DFESu3(QCDConstants constants, DFEVector<DFEComplex> su3) {
+		super(constants.getKernel());
+		m_constants = constants;
+		m_cplxType = QCDConstants.dataType;
+
+		/*c00 = m_cplxType.newInstance(constants.getKernel());
+		c01 = m_cplxType.newInstance(constants.getKernel());
+		c02 = m_cplxType.newInstance(constants.getKernel());
+		c10 = m_cplxType.newInstance(constants.getKernel());
+		c11 = m_cplxType.newInstance(constants.getKernel());
+		c12 = m_cplxType.newInstance(constants.getKernel());
+		c20 = m_cplxType.newInstance(constants.getKernel());
+		c21 = m_cplxType.newInstance(constants.getKernel());
+		c22 = m_cplxType.newInstance(constants.getKernel());*/
+
+		c00 = su3[0];
+		c01 = su3[1];
+		c02 = su3[2];
+		c10 = su3[3];
+		c11 = su3[4];
+		c12 = su3[5];
+		c20 = su3[6];
+		c21 = su3[7];
+		c22 = su3[8];
+	}
+
+	public DFESu3 conjugate () {
+		DFESu3 temp = new DFESu3(m_constants);
+		temp.c00 = c00.conjugate();
+		temp.c01 = c01.conjugate();
+		temp.c02 = c02.conjugate();
+		temp.c10 = c10.conjugate();
+		temp.c11 = c11.conjugate();
+		temp.c12 = c12.conjugate();
+		temp.c20 = c20.conjugate();
+		temp.c21 = c21.conjugate();
+		temp.c22 = c22.conjugate();
+		return temp;
+	}
+
+	public DFESu3Vector mul (DFESu3Vector a) {
+		DFESu3Vector temp = new DFESu3Vector(m_constants);
+		temp.c0 = c00 * a.c0 + c01 *a.c1 + c02 * a.c2;
+		temp.c1 = c10 * a.c0 + c11 *a.c1 + c12 * a.c2;
+		temp.c2 = c20 * a.c0 + c21 *a.c1 + c22 * a.c2;
+		return temp;
+	}
+
+	public DFESu3Vector inverse_multiply (DFESu3Vector a) {
+		DFESu3Vector temp = new DFESu3Vector(m_constants);
+		temp.c0 = c00.conjugate() * a.c0 + c10.conjugate() *a.c1 + c20.conjugate() * a.c2;
+		temp.c1 = c01.conjugate() * a.c0 + c11.conjugate() *a.c1 + c21.conjugate() * a.c2;
+		temp.c2 = c02.conjugate() * a.c0 + c12.conjugate() *a.c1 + c22.conjugate() * a.c2;
+		return temp;
+	}
+
+	public DFESu3 adjoint () {
+		DFESu3 temp = new DFESu3(m_constants);
+		temp.c00 = c00.conjugate();
+		temp.c01 = c10.conjugate();
+		temp.c02 = c20.conjugate();
+		temp.c10 = c01.conjugate();
+		temp.c11 = c11.conjugate();
+		temp.c12 = c21.conjugate();
+		temp.c20 = c02.conjugate();
+		temp.c21 = c12.conjugate();
+		temp.c22 = c22.conjugate();
+		return temp;
+	}
+
+	public DFESu3 transpose () {
+		DFESu3 temp = new DFESu3(m_constants);
+		temp.c00 = c00;
+		temp.c01 = c10;
+		temp.c02 = c20;
+		temp.c10 = c01;
+		temp.c11 = c11;
+		temp.c12 = c21;
+		temp.c20 = c02;
+		temp.c21 = c12;
+		temp.c22 = c22;
+		return temp;
+	}
+}

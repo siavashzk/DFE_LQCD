@@ -1,0 +1,110 @@
+Tue 15:56: ########################################## 
+Tue 15:56: Compiling.
+Tue 15:56: ########################################## 
+
+Tue 15:56: MaxCompiler version: 2014.2.
+Tue 15:56: Build Simulation run rule for DFE_QPHIX start time: Tue Jun 30 15:56:26 BST 2015.
+Tue 15:56: Project location: /home/skamali/workspace3/DFE_QPHIX.
+Tue 15:56: Detailed build log: /home/skamali/workspace3/DFE_QPHIX/RunRules/Simulation/build.log.
+
+Tue 15:56: Compiling Engine Code.
+Tue 15:56: Building S_LQCD.max file. 
+Tue 15:56: Setting environment variable:
+Tue 15:56: MAXCOMPILER_BUILD_DIR : /network-scratch/skamali/maxdc_builds/
+Tue 15:56: MAX_BUILDPARAMS : DFEModel='GALAVA' target='DFE_SIM' maxFileName='S_LQCD'  
+Tue 15:56: Building output:
+Tue 15:56: MaxCompiler version: 2014.2
+Tue 15:56: Build "S_LQCD" start time: Tue Jun 30 15:56:28 BST 2015
+Tue 15:56: Main build process running as user skamali on host nxws27.office.maxeler.com
+Tue 15:56: Build location: /scratch/skamali/maxdc_builds/30-06-15/S_LQCD_DFE_SIM_10_6_6_8
+Tue 15:56: Detailed build log available in "_build.log"
+Tue 15:56: 
+Tue 15:56: ENGINE BUILD PARAMETERS
+Tue 15:56: 	 Build name: S_LQCD_DFE_SIM_10_6_6_8
+Tue 15:56: 	   DFEModel: GALAVA                 
+Tue 15:56: 	maxFileName: S_LQCD                 
+Tue 15:56: 	     target: DFE_SIM                
+Tue 15:56: 	 enableMPCX: false                  
+Tue 15:56: 	          T: 10                     
+Tue 15:56: 	         LZ: 8                      
+Tue 15:56: 	         LY: 6                      
+Tue 15:56: 	         LX: 6                      
+Tue 15:56: 	          P: 2                      
+Tue 15:56: 	LOOP_OFFSET: 9                      
+Tue 15:56: 	     VOLUME: 2880                   
+Tue 15:56: Instantiating kernel "times1kernel"
+Tue 15:56: Depth: 512
+Tue 15:56: 
+Tue 15:56: Compiling kernel "times1kernel"
+Tue 15:56: WARNING: Warning (UNCONNECTED_DESIGN_ELEMENT):
+Tue 15:56: WARNING: Unconnected elements in design 'times1kernel'
+Tue 15:56: WARNING: details in : /scratch/skamali/maxdc_builds/30-06-15/S_LQCD_DFE_SIM_10_6_6_8/scratch/times1kernel_graph_warnings.txt
+Tue 15:56: WARNING: Transitioning from non-multiple stream widths 128 to 576 via a stream of width 1152 is suboptimal for performance and resource utilization.  Use Manager.setAllowNonMultipleTransitions(true) or config.setAllowNonMultipleTransitions(true) (in a CustomManager) to allow such transitions.
+Tue 15:56: WARNING: Source='times1kernel_gauge0.times1kernel_gauge0' Sink='times1kernel.times1kernel_gauge0'
+Tue 15:56: WARNING: Transitioning from non-multiple stream widths 128 to 576 via a stream of width 1152 is suboptimal for performance and resource utilization.  Use Manager.setAllowNonMultipleTransitions(true) or config.setAllowNonMultipleTransitions(true) (in a CustomManager) to allow such transitions.
+Tue 15:56: WARNING: Source='times1kernel_gauge1.times1kernel_gauge1' Sink='times1kernel.times1kernel_gauge1'
+Tue 15:56: Running back-end simulation build (3 phases)
+Tue 15:56: (1/3) - Prepare MaxFile Data (GenerateMaxFileDataFile)
+Tue 15:56: (2/3) - Compile Simulation Modules (SimCompilePass)
+Tue 15:56: (3/3) - Generate MaxFile (AddSimObjectToMaxFilePass)
+Tue 15:56: MaxFile: /scratch/skamali/maxdc_builds/30-06-15/S_LQCD_DFE_SIM_10_6_6_8/results/S_LQCD.max (MD5Sum: c6385fdfefe37acaa91dfd69f6bd9a28)
+Tue 15:56: Build completed: Tue Jun 30 15:56:51 BST 2015 (took 23 secs)
+Tue 15:56: Executing command:
+Tue 15:56: cp /home/skamali/workspace3/DFE_QPHIX/RunRules/Simulation/maxfiles/S_LQCD.h /home/skamali/workspace3/DFE_QPHIX/RunRules/Simulation/include/S_LQCD.h 
+Tue 15:56: Command output:
+Tue 15:56: Building: S_LQCD.max file finished.
+Tue 15:56: Engine build finished.
+Tue 15:56: Compiling CPU Code.
+Tue 15:56: Run CPU project make files updating
+Tue 15:56: Executing command:
+Tue 15:56: java -jar /network-raid/opt/maxcompiler-2014.2/lib/MaxIDE/projectAdmin.jar -u /home/skamali/workspace3/DFE_QPHIX Simulation 
+Tue 15:56: Command output:
+
+Tue 15:56: MaxCompiler Project Admin Tool Version 2014.2
+Tue 15:56:  Copyright Maxeler Technologies 2010 - 2014. All rights reserved.
+Tue 15:56: Handler version 2
+Tue 15:56: Updating RunRule dependent Makefiles for RunRule 'Simulation'
+Tue 15:56: 	Updating: Simulation
+Tue 15:56: Found makefiles: 1
+Tue 15:56: 	Updated: Simulation
+Tue 15:56: Run CPU make.
+Tue 15:56: make RUNRULE=Simulation 
+Tue 15:56: Command output:
+Tue 15:56: make -f Makefile.rules build
+Tue 15:56: make[1]: Entering directory `/home/skamali/workspace3/DFE_QPHIX/CPUCode'
+Tue 15:56: set -e; rm -f ../RunRules/Simulation/objects/c/S_LQCDCpuCode.d ;                                                             \
+Tue 15:56: 	  cc -M -std=gnu99 -g -O3 -Wall -Wextra -I../RunRules/Simulation/include  -I '/network-raid/opt/maxcompiler-2014.2/include/slic'  -Wno-error S_LQCDCpuCode.c > ../RunRules/Simulation/objects/c/S_LQCDCpuCode.d.$$ ;                                 \
+Tue 15:56:       sed 's,\(S_LQCDCpuCode\)\.o[ :]*,../RunRules/Simulation/objects/c/\1.o ../RunRules/Simulation/objects/c/S_LQCDCpuCode.d : ,g' < ../RunRules/Simulation/objects/c/S_LQCDCpuCode.d.$$ > ../RunRules/Simulation/objects/c/S_LQCDCpuCode.d; \
+Tue 15:56:       rm -f ../RunRules/Simulation/objects/c/S_LQCDCpuCode.d.$$
+Tue 15:56: make[1]: Leaving directory `/home/skamali/workspace3/DFE_QPHIX/CPUCode'
+Tue 15:56: make[1]: Entering directory `/home/skamali/workspace3/DFE_QPHIX/CPUCode'
+Tue 15:56: "/network-raid/opt/maxcompiler-2014.2/bin/sliccompile" ../RunRules/Simulation/maxfiles/S_LQCD.max ../RunRules/Simulation/objects/maxfiles/slic_S_LQCD.o
+Tue 15:56: Processing maxfile for MAX4412A_SIM from '../RunRules/Simulation/maxfiles/S_LQCD.max'.
+Tue 15:56: gcc -std=gnu99 -Wall -Werror -fno-guess-branch-probability -frandom-seed=foo -Wno-unused-variable -Wno-unused-function -fPIC -I /network-raid/opt/maxcompiler-2014.2/include/slic -DMAXFILE_INC="/home/skamali/workspace3/DFE_QPHIX/CPUCode/../RunRules/Simulation/maxfiles/S_LQCD.max" -DSLIC_NO_DESTRUCTORS -c /network-raid/opt/maxcompiler-2014.2/src/slicinterface/MaxFileInit.c -o slic_S_LQCD.o 
+Tue 15:56: Copying .max file C object into '/home/skamali/workspace3/DFE_QPHIX/CPUCode/../RunRules/Simulation/objects/maxfiles'
+Tue 15:56: cc -std=gnu99 -g -O3 -Wall -Wextra -I../RunRules/Simulation/include  -I '/network-raid/opt/maxcompiler-2014.2/include/slic'  -c S_LQCDCpuCode.c -o ../RunRules/Simulation/objects/c/S_LQCDCpuCode.o
+Tue 15:56: cc -std=gnu99 -g -O3 -Wall -Wextra -I../RunRules/Simulation/include  -I '/network-raid/opt/maxcompiler-2014.2/include/slic'  -o ../RunRules/Simulation/binaries/S_LQCD ../RunRules/Simulation/objects/maxfiles/slic_S_LQCD.o ../RunRules/Simulation/objects/c/S_LQCDCpuCode.o ../RunRules/Simulation/objects/c/geometry.o ../RunRules/Simulation/objects/c/hopping.o -g -O3  -L '/network-raid/opt/maxcompiler-2014.2/lib' -lslic -L '/network-raid/opt/maxeleros-2014.2/maxeleros/lib' -lmaxeleros -lpthread -lm -lrt 
+Tue 15:56: make[1]: Leaving directory `/home/skamali/workspace3/DFE_QPHIX/CPUCode'
+Tue 15:56: Build completed: Tue Jun 30 15:56:55 BST 2015
+
+
+Tue 15:56: ########################################## 
+Tue 15:56: Running
+Tue 15:56: ########################################## 
+Tue 15:56: Executing command:
+Tue 15:56: '/home/skamali/workspace3/DFE_QPHIX/RunRules/Simulation/binaries/S_LQCD' 
+Tue 15:56: Command output:
+Tue 15:56: Allocating memory for data ... 
+Tue 15:56: Done!
+Tue 15:56: Creating random spinor and gauge inputs ... 
+Tue 15:56: Reading spinor and gauge inputs ... 
+Tue 15:56: Done!
+Tue 15:56: Data reordering and adding necessary halos ... 
+Tue 15:56: Done!
+Tue 15:56: Setting up DFE SLIC  ... 
+Tue 15:56: Done!
+Tue 15:56: Running LQCD on DFE ...
+Tue 15:56: Done!
+Tue 15:56: Verifying LQCD output ...
+Tue 15:56: Good.
+Tue 15:56: Process terminated with exit code 0.

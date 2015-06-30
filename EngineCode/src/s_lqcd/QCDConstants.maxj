@@ -1,0 +1,70 @@
+package s_lqcd;
+
+import com.maxeler.maxcompiler.v2.kernelcompiler.Kernel;
+import com.maxeler.maxcompiler.v2.kernelcompiler.KernelLib;
+import com.maxeler.maxcompiler.v2.kernelcompiler.types.composite.DFEComplex;
+import com.maxeler.maxcompiler.v2.kernelcompiler.types.composite.DFEComplexType;
+import com.maxeler.maxcompiler.v2.kernelcompiler.types.composite.DFEVectorType;
+
+public class QCDConstants extends KernelLib {
+
+	public int LX, LY, LZ, T, numPipes, loopOffset;
+	public static DFEComplexType dataType = new DFEComplexType(dfeFloat(8,24));
+
+	protected QCDConstants (
+			Kernel owner,
+			int LX_,
+			int LY_,
+			int LZ_,
+			int T_,
+			int numPipes_,
+			int loopOffset_) {
+		super(owner);
+		LX = LX_;
+		LY = LY_;
+		LZ = LZ_;
+		T = T_;
+		numPipes = numPipes_;
+		loopOffset = loopOffset_;
+
+
+		if (T%2 != 0) {
+			throw new RuntimeException("Dimention T should be even");
+		}
+
+		if (LX%2 != 0) {
+			throw new RuntimeException("Dimention X should be even");
+		}
+
+		if (LY%2 != 0) {
+			throw new RuntimeException("Dimention LY should be even");
+		}
+
+		if (LZ%2 != 0) {
+			throw new RuntimeException("Dimention LZ should be even");
+		}
+
+		if ((LY*LX/2)%(loopOffset) != 0) {
+			throw new RuntimeException("loopOffset should divide LY*LX/2");
+		}
+	}
+
+	static public DFEVectorType<DFEComplex> getVectoredSpinorType () {
+		DFEVectorType<DFEComplex> type =
+			new DFEVectorType<DFEComplex>(dataType, 4*3);
+		return type;
+	}
+
+	static public DFEVectorType<DFEComplex> getVectoredSu3Type () {
+		DFEVectorType<DFEComplex> type =
+			new DFEVectorType<DFEComplex>(dataType,9);
+		return type;
+	}
+
+	static public DFEVectorType<DFEComplex> getVectoredHalfSpinorType () {
+		DFEVectorType<DFEComplex> type =
+			new DFEVectorType<DFEComplex>(dataType, 2*3);
+		return type;
+	}
+
+}

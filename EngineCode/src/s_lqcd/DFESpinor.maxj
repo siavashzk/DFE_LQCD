@@ -1,0 +1,91 @@
+package s_lqcd;
+
+import com.maxeler.maxcompiler.v2.kernelcompiler.KernelLib;
+import com.maxeler.maxcompiler.v2.kernelcompiler.types.composite.DFEComplex;
+import com.maxeler.maxcompiler.v2.kernelcompiler.types.composite.DFEVector;
+
+public class DFESpinor extends KernelLib {
+
+	public DFESu3Vector s0, s1, s2, s3;
+
+	private final QCDConstants m_constants;
+
+
+	protected DFESpinor(QCDConstants constants) {
+		super(constants.getKernel());
+		m_constants = constants;
+	}
+
+	protected DFESpinor(QCDConstants constants, DFEVector<DFEComplex> in) {
+		super(constants.getKernel());
+		m_constants = constants;
+		s0 = new DFESu3Vector (m_constants);
+		s1 = new DFESu3Vector (m_constants);
+		s2 = new DFESu3Vector (m_constants);
+		s3 = new DFESu3Vector (m_constants);
+
+		s0.c0 = in[0];
+		s0.c1 = in[1];
+		s0.c2 = in[2];
+
+		s1.c0 = in[3];
+		s1.c1 = in[4];
+		s1.c2 = in[5];
+
+		s2.c0 = in[6];
+		s2.c1 = in[7];
+		s2.c2 = in[8];
+
+		s3.c0 = in[9];
+		s3.c1 = in[10];
+		s3.c2 = in[11];
+
+	}
+
+	public void newInstant() {
+		s0 = new DFESu3Vector (m_constants);
+		s1 = new DFESu3Vector (m_constants);
+		s2 = new DFESu3Vector (m_constants);
+		s3 = new DFESu3Vector (m_constants);
+	}
+
+	public DFESpinor streamoffset(int offset) {
+		DFESpinor temp = new DFESpinor(m_constants);
+
+		temp.s0 = s0.streamoffset(offset);
+		temp.s1 = s1.streamoffset(offset);
+		temp.s2 = s2.streamoffset(offset);
+		temp.s3 = s3.streamoffset(offset);
+
+		return temp;
+	}
+
+	public DFESpinor add (DFESpinor a) {
+		DFESpinor temp = new DFESpinor(m_constants);
+		temp.s0 = s0 + a.s0;
+		temp.s1 = s1 + a.s1;
+		temp.s2 = s2 + a.s2;
+		temp.s3 = s3 + a.s3;
+		return temp;
+	}
+
+	public DFEVector<DFEComplex> convertToDFEVector () {
+		DFEVector<DFEComplex> result =
+			QCDConstants.getVectoredSpinorType().newInstance(m_constants.getKernel());
+
+		result[0]  <== s0.c0;
+		result[1]  <== s0.c1;
+		result[2]  <== s0.c2;
+		result[3]  <== s1.c0;
+		result[4]  <== s1.c1;
+		result[5]  <== s1.c2;
+		result[6]  <== s2.c0;
+		result[7]  <== s2.c1;
+		result[8]  <== s2.c2;
+		result[9]  <== s3.c0;
+		result[10] <== s3.c1;
+		result[11] <== s3.c2;
+
+		return result;
+	}
+}

@@ -1,0 +1,73 @@
+package s_lqcd;
+
+import com.maxeler.maxcompiler.v2.kernelcompiler.KernelLib;
+import com.maxeler.maxcompiler.v2.kernelcompiler.types.composite.DFEComplex;
+import com.maxeler.maxcompiler.v2.kernelcompiler.types.composite.DFEVector;
+
+public class DFEHalfSpinor extends KernelLib {
+
+	public DFESu3Vector s0, s1;
+
+	private final QCDConstants m_constants;
+
+	protected DFEHalfSpinor(QCDConstants constants) {
+		super(constants.getKernel());
+		m_constants = constants;
+	}
+
+	protected DFEHalfSpinor(QCDConstants constants, DFEVector<DFEComplex> in) {
+		super(constants.getKernel());
+		m_constants = constants;
+		s0 = new DFESu3Vector (m_constants);
+		s1 = new DFESu3Vector (m_constants);
+
+		s0.c0 = in[0];
+		s0.c1 = in[1];
+		s0.c2 = in[2];
+
+		s1.c0 = in[3];
+		s1.c1 = in[4];
+		s1.c2 = in[5];
+
+	}
+
+	public void newInstant() {
+		s0 = new DFESu3Vector (m_constants);
+		s1 = new DFESu3Vector (m_constants);
+	}
+
+	public void connect (DFEHalfSpinor a) {
+		s0 <== a.s0;
+		s1 <== a.s1;
+	}
+
+	public DFEHalfSpinor streamoffset(int offset) {
+		DFEHalfSpinor temp = new DFEHalfSpinor(m_constants);
+		temp.s0 = new DFESu3Vector(m_constants);
+		temp.s1 = new DFESu3Vector(m_constants);
+
+		temp.s0.c0 = stream.offset(s0.c0, offset);
+		temp.s0.c1 = stream.offset(s0.c1, offset);
+		temp.s0.c2 = stream.offset(s0.c2, offset);
+		temp.s1.c0 = stream.offset(s1.c0, offset);
+		temp.s1.c1 = stream.offset(s1.c1, offset);
+		temp.s1.c2 = stream.offset(s1.c2, offset);
+
+		return temp;
+	}
+
+	public DFEVector<DFEComplex> convertToDFEVector () {
+		DFEVector<DFEComplex> result =
+			QCDConstants.getVectoredHalfSpinorType().newInstance(m_constants);
+
+		result[0]  <== s0.c0;
+		result[1]  <== s0.c1;
+		result[2]  <== s0.c2;
+		result[3]  <== s1.c0;
+		result[4]  <== s1.c1;
+		result[5]  <== s1.c2;
+
+		return result;
+	}
+
+}
