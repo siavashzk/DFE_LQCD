@@ -108,7 +108,8 @@ public class S_LQCDManager extends CustomManager {
 						engineParameters.getLX(),
 						engineParameters.getLY(),
 						engineParameters.getLZ(),
-						engineParameters.getLoopOffset()
+						engineParameters.getLoopOffset(),
+						engineParameters.getNumPipes()
 						)
 				);
 
@@ -122,13 +123,14 @@ public class S_LQCDManager extends CustomManager {
 		addMaxFileConstant("LX", engineParameters.getLX());
 		addMaxFileConstant("LY", engineParameters.getLY());
 		addMaxFileConstant("LZ", engineParameters.getLZ());
+		addMaxFileConstant("loopOffset", engineParameters.getLoopOffset());
 	}
 
-	private static int getVolumeWithHalos (int L, int T, int h) {
+	/*private static int getVolumeWithHalos (int L, int T, int h) {
 		return (T+2*h) * (L+2*h) * (L+2*h) * (L/2+h);
-	}
+	}*/
 
-	private static EngineInterface modeDefault(int T, int LX, int LY, int LZ, int loopOffset) {
+	private static EngineInterface modeDefault(int T, int LX, int LY, int LZ, int loopOffset, int numPipes) {
 		EngineInterface engine_interface = new EngineInterface();
 		/*CPUTypes   type = CPUTypes.FLOAT;
 
@@ -141,7 +143,7 @@ public class S_LQCDManager extends CustomManager {
 		int VH3 = getVolumeWithHalos(LX,T,2);
 		int VH4 = getVolumeWithHalos(LX,T,1);*/
 
-		engine_interface.setTicks("times1kernel", 8 * (T+2)*LX*LY*LZ/2 + 8 * loopOffset + 2);
+		engine_interface.setTicks("times1kernel", 16/numPipes * ( (T+2)*LX*LY*LZ/2 +  loopOffset) + 2);
 		//engine_interface.setTicks("sub1kernel", VH2);
 		//engine_interface.setTicks("times2kernel", VH3);
 		//engine_interface.setTicks("sub2kernel", VH4);

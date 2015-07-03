@@ -49,6 +49,13 @@ public class DFESpinor extends KernelLib {
 		s3 = new DFESu3Vector (m_constants);
 	}
 
+	public void newZeroInstant() {
+		s0 = new DFESu3Vector (m_constants, 0, 0);
+		s1 = new DFESu3Vector (m_constants, 0, 0);
+		s2 = new DFESu3Vector (m_constants, 0, 0);
+		s3 = new DFESu3Vector (m_constants, 0, 0);
+	}
+
 	public DFESpinor streamoffset(int offset) {
 		DFESpinor temp = new DFESpinor(m_constants);
 

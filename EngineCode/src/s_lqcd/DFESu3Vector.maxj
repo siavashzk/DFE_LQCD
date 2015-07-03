@@ -21,6 +21,22 @@ public class DFESu3Vector extends KernelLib {
 		c2 = m_cplxType.newInstance(constants.getKernel());
 	}
 
+	protected DFESu3Vector(QCDConstants constants, int real, int imag) {
+		super(constants.getKernel());
+		m_constants = constants;
+		m_cplxType = QCDConstants.dataType;
+		c0 = m_cplxType.newInstance(constants.getKernel());
+		c1 = m_cplxType.newInstance(constants.getKernel());
+		c2 = m_cplxType.newInstance(constants.getKernel());
+
+		c0.setReal(constant.var(dfeFloat(8,24),real));
+		c0.setImaginary(constant.var(dfeFloat(8,24),imag));
+		c1.setReal(constant.var(dfeFloat(8,24),real));
+		c1.setImaginary(constant.var(dfeFloat(8,24),imag));
+		c2.setReal(constant.var(dfeFloat(8,24),real));
+		c2.setImaginary(constant.var(dfeFloat(8,24),imag));
+	}
+
 	protected DFESu3Vector(QCDConstants constants, DFEVector<DFEComplex> su3vec) {
 		super(constants.getKernel());
 		m_constants = constants;
@@ -123,5 +139,16 @@ public class DFESu3Vector extends KernelLib {
 		return temp;
 	}
 
+
+	public DFEVector<DFEComplex> convertToDFEVector () {
+		DFEVector<DFEComplex> result =
+			QCDConstants.getVectoredSu3VectorType().newInstance(m_constants);
+
+		result[0]  <== c0;
+		result[1]  <== c1;
+		result[2]  <== c2;
+
+		return result;
+	}
 
 }

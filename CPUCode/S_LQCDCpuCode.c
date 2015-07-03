@@ -340,7 +340,7 @@ void read_spinor(char * filename, spinor *out) {
 
 	for (int t=0 ; t<T ; t++ ) {
 		for (int z=0 ; z<LZ ; z++ ) {
-			for (int y=0 ; y<LX ; y++ ) {
+			for (int y=0 ; y<LY ; y++ ) {
 				for (int x=0 ; x<LX/2 ; x++ ) {
 
 					/*int isOddRow = (t & 1) ^ (z & 1) ^ (y & 1);

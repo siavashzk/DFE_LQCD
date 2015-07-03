@@ -19,13 +19,12 @@ public class S_LQCDEngineParameters extends EngineParameters {
 	@Override
 	protected void declarations() {
 		declareParam(s_T, DataType.INT, 10);
-		declareParam(s_LZ, DataType.INT, 8);
-		declareParam(s_LY, DataType.INT, 6);
+		declareParam(s_LZ, DataType.INT, 4);
+		declareParam(s_LY, DataType.INT, 10);
 		declareParam(s_LX, DataType.INT, 6);
-		declareParam(s_numPipes, DataType.INT, 2);
-		declareParam(s_loopOffset, DataType.INT, 9); // should divide LX*LY/2
+		declareParam(s_numPipes, DataType.INT, 4);
+		declareParam(s_loopOffset, DataType.INT, 15); // should divide LX*LY/2
 		declareParam(s_volume, DataType.INT, 256);
-
 
 	}
 

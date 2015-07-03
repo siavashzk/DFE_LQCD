@@ -17,14 +17,19 @@ public class HalfSpinorBuffer extends KernelLib {
 
 	private final QCDConstants m_constants;
 
-	private DFEVar write_mu;
 	private DFEVar write_t, write_x, write_y, write_z;
-	private DFEVar read_t, read_x, read_y, read_z;
 
-	private DFEHalfSpinor m_bufferIn;
-	private DFEHalfSpinor[] m_bufferOut;
+	private final DFEVar write_iter;
+	private DFEVar read_t,  read_x,  read_y,  read_z;
 
-	int LX, LY, LZ, T, numPipes;
+	private final DFEVar read_iter;
+
+	private DFEVar writeEnable;
+	private final DFESu3Vector[] m_bufferIn;
+	private DFESu3Vector[] m_bufferOut;
+
+	int LX, LY, LZ, T;
+	int m_numPipes, m_vectorsPerSite;
 
 	int bufferDepth, bufferDepthTF, bufferDepthTB;
 
@@ -35,69 +40,80 @@ public class HalfSpinorBuffer extends KernelLib {
 		LY = m_constants.LY;
 		LZ = m_constants.LZ;
 		T  = m_constants.T;
-		numPipes = m_constants.numPipes;
+		m_numPipes = m_constants.numPipes;
+		m_vectorsPerSite = 16/m_numPipes;
 
 		int loopOffset = m_constants.loopOffset;
 
-		bufferDepth   = MathUtils.nextMultiple(loopOffset + 1 + LX*LY*LZ/2, singleBRAMdepth);
-		bufferDepthTF = MathUtils.nextMultiple(loopOffset + 1 + 2*LX*LY*LZ/2, singleBRAMdepth);
-		bufferDepthTB = MathUtils.nextMultiple(  loopOffset + 1, singleBRAMdepth);
+		bufferDepth   = MathUtils.nextMultiple(m_vectorsPerSite*(loopOffset + 20 + 2*LX*LY*LZ/2), singleBRAMdepth);
+		//bufferDepthTF = MathUtils.nextMultiple(m_vectorsPerSite*loopOffset + 1 + 2*LX*LY*LZ/2, singleBRAMdepth);
+		//bufferDepthTB = MathUtils.nextMultiple(m_vectorsPerSite*loopOffset + 1               , singleBRAMdepth);
 
 		System.out.println("Depth: " + bufferDepth);
 
 		Kernel owner = m_constants.getKernel();
 
-		write_t  = dfeUInt(MathUtils.bitsToAddress(T+2)) .newInstance(owner);
-		write_z  = dfeUInt(MathUtils.bitsToAddress(LZ))  .newInstance(owner);
-		write_y  = dfeUInt(MathUtils.bitsToAddress(LY))  .newInstance(owner);
-		write_x  = dfeUInt(MathUtils.bitsToAddress(LX/2)).newInstance(owner);
-		write_mu = dfeUInt(MathUtils.bitsToAddress(8))   .newInstance(owner);
+		writeEnable = dfeBool().newInstance(owner);
 
-		read_t = dfeUInt(MathUtils.bitsToAddress(T+2)) .newInstance(owner);
-		read_z = dfeUInt(MathUtils.bitsToAddress(LZ))  .newInstance(owner);
-		read_y = dfeUInt(MathUtils.bitsToAddress(LY))  .newInstance(owner);
-		read_x = dfeUInt(MathUtils.bitsToAddress(LX/2)).newInstance(owner);
+		write_t    = dfeUInt(MathUtils.bitsToAddress(T+2)) .newInstance(owner);
+		write_z    = dfeUInt(MathUtils.bitsToAddress(LZ))  .newInstance(owner);
+		write_y    = dfeUInt(MathUtils.bitsToAddress(LY))  .newInstance(owner);
+		write_x    = dfeUInt(MathUtils.bitsToAddress(LX/2)).newInstance(owner);
+		write_iter = dfeUInt(MathUtils.bitsToAddress(m_vectorsPerSite)).newInstance(owner);
 
-		m_bufferIn = new DFEHalfSpinor(m_constants);
-		m_bufferIn.newInstant();
+		read_t    = dfeUInt(MathUtils.bitsToAddress(T+2)) .newInstance(owner);
+		read_z    = dfeUInt(MathUtils.bitsToAddress(LZ))  .newInstance(owner);
+		read_y    = dfeUInt(MathUtils.bitsToAddress(LY))  .newInstance(owner);
+		read_x    = dfeUInt(MathUtils.bitsToAddress(LX/2)).newInstance(owner);
+		read_iter = dfeUInt(MathUtils.bitsToAddress(m_vectorsPerSite)).newInstance(owner);
 
-		m_bufferOut = new DFEHalfSpinor[8];
-		DFEVar writeAddress = getAddress(write_t, write_z, write_y, write_x, -1);
-		DFEVar[] writeEnable = getWriteEnable();
-		DFEVar[] readAddress = new DFEVar[8];
-		for (int i=0 ; i<8 ; i++ ) {
-			readAddress[i] = getAddress(read_t, read_z, read_y, read_x, i);
+		m_bufferIn = new DFESu3Vector[m_numPipes];
+		m_bufferOut = new DFESu3Vector[m_numPipes];
+
+		DFEVar[] readAddress = getReadAddresses(read_t, read_z, read_y, read_x, read_iter);
+
+		DFEVar writeAddress  = getAddress(write_t, write_z, write_y, write_x, write_iter);
+
+		for (int i=0 ; i<m_numPipes ; i++ ) {
+			m_bufferIn[i] = new DFESu3Vector(m_constants);
 		}
 
 		m_bufferOut = createBuffer(
 				m_bufferIn,
 				writeAddress,
-				writeEnable,
 				readAddress,
 				bufferDepth
 				);
 	}
 
-	public void setWriteCoordinates(DFEVar t, DFEVar z, DFEVar y, DFEVar x, DFEVar mu) {
+	public void setWriteCoordinates(DFEVar t, DFEVar z, DFEVar y, DFEVar x, DFEVar iter) {
 		write_t <== t;
 		write_z <== z;
 		write_y <== y;
 		write_x <== x;
-		write_mu <== mu;
+		write_iter <== iter;
 	}
 
-	public void setReadCoordinates(DFEVar t, DFEVar z, DFEVar y, DFEVar x) {
+	public void setReadCoordinates(DFEVar t, DFEVar z, DFEVar y, DFEVar x, DFEVar iter) {
 		read_t <== t;
 		read_z <== z;
 		read_y <== y;
 		read_x <== x;
+		read_iter <== iter;
 	}
 
-	public void setBufferIn(DFEHalfSpinor in) {
-		m_bufferIn <== in;
+	public void setBufferIn(int pipe, DFESu3Vector in) {
+		m_bufferIn[pipe] <== in;
 	}
 
-	public DFEHalfSpinor getBufferOut (DFEVar mu) {
+	public void setWriteEnable(DFEVar isEnabled) {
+		writeEnable <== isEnabled;
+	}
+
+	public DFESu3Vector getBufferOut (int pipe) {
+		return m_bufferOut[pipe];
+	}
+	/*public DFESu3Vector getBufferOut (DFEVar mu) {
 		DFEQCDSelector mub2 = new DFEQCDSelector (m_constants, (mu&4)===4 );
 		DFEQCDSelector mub1 = new DFEQCDSelector (m_constants, (mu&2)===2 );
 		DFEQCDSelector mub0 = new DFEQCDSelector (m_constants, (mu&1)===1 );
@@ -134,7 +150,7 @@ public class HalfSpinorBuffer extends KernelLib {
 			);
 
 		return out;
-	}
+	}*/
 
 
 	private DFEVar mod(DFEVar dividend, int divisor) {
@@ -154,31 +170,30 @@ public class HalfSpinorBuffer extends KernelLib {
 		}
 	}
 
-	private DFEHalfSpinor[] createBuffer(
-			DFEHalfSpinor halfSpinor_in,
+	private DFESu3Vector[] createBuffer(
+			DFESu3Vector[] halfSpinor_in,
             DFEVar writeAddress,
-            DFEVar[] writeEnable,
             DFEVar[] readAddress,
 			int bufferDepth)
 	{
-		DFEHalfSpinor[] bufferOutput = new DFEHalfSpinor[8];
-		DFEVector<DFEComplex> in = halfSpinor_in.convertToDFEVector();
+		DFESu3Vector[] bufferOutput = new DFESu3Vector[m_numPipes];
 
-		for (int i = 0 ; i < 8 ; i ++ ) {
+		for (int i = 0 ; i < m_numPipes ; i ++ ) {
+			DFEVector<DFEComplex> in = halfSpinor_in[i].convertToDFEVector();
 			RamPortParams<DFEVector<DFEComplex>> writePort =
 				mem.makeRamPortParams(
 						RamPortMode.WRITE_ONLY,
 						writeAddress,
-						QCDConstants.getVectoredHalfSpinorType()
+						QCDConstants.getVectoredSu3VectorType()
 						)
 						.withDataIn(in)
-						.withWriteEnable(writeEnable[i]);
+						.withWriteEnable(writeEnable);
 
 			RamPortParams<DFEVector<DFEComplex>> readPort  =
 				mem.makeRamPortParams(
 						RamPortMode.READ_ONLY,
 						readAddress[i],
-						QCDConstants.getVectoredHalfSpinorType());
+						QCDConstants.getVectoredSu3VectorType());
 
 			DFEVector<DFEComplex> ram =
 				mem.ramDualPort(
@@ -188,71 +203,88 @@ public class HalfSpinorBuffer extends KernelLib {
 						readPort)
 						.getOutputB();
 
-			bufferOutput[i] = new DFEHalfSpinor(m_constants, ram);
+			bufferOutput[i] = new DFESu3Vector(m_constants, ram);
 
 		}
 
 		return bufferOutput;
 	}
 
-	private DFEVar getAddress(DFEVar t, DFEVar z, DFEVar y, DFEVar x, int mu) {
+	private DFEVar[] getReadAddresses(DFEVar t, DFEVar z, DFEVar y, DFEVar x, DFEVar iter) {
+
+		DFEVar addresses[] = new DFEVar[m_numPipes];
+
+		/*t.simWatch("t");
+		z.simWatch("z");
+		iter.simWatch("iter");
+		y.simWatch("y");
+		x.simWatch("x");*/
 
 		optimization.pushEnableBitGrowth(true);
 
-		if (mu < 0 ) {
-			// Generate the address for the current site itself
-		} else if (mu < 2) {
+		DFEVar isOddRow =
+			(t&1).cast(dfeBool()) ^
+			(z&1).cast(dfeBool()) ^
+			(y&1).cast(dfeBool()) ^ 1;
+		DFEVar xn = mod(x + LX - 1 + isOddRow, LX/2)
+		            .cast(dfeUInt(MathUtils.bitsToAddress(LX/2)));
+		DFEVar xp = mod(x + LX + 0 + isOddRow, LX/2)
+		            .cast(dfeUInt(MathUtils.bitsToAddress(LX/2)));
+		DFEVar yn = mod(y - 1, LY).cast(dfeUInt(MathUtils.bitsToAddress(LY)));
+		DFEVar yp = mod(y + 1, LY).cast(dfeUInt(MathUtils.bitsToAddress(LY)));
+		DFEVar zn = mod(z - 1, LZ).cast(dfeUInt(MathUtils.bitsToAddress(LZ)));
+		DFEVar zp = mod(z + 1, LZ).cast(dfeUInt(MathUtils.bitsToAddress(LZ)));
+		DFEVar tn = (t - 1).cast(dfeUInt(MathUtils.bitsToAddress(T+2)));
+		DFEVar tp = (t + 1).cast(dfeUInt(MathUtils.bitsToAddress(T+2)));
 
-			DFEVar isOddRow =
-				(t&1).cast(dfeBool()) ^
-				(z&1).cast(dfeBool()) ^
-				(y&1).cast(dfeBool()) ^ 1;
+		optimization.popEnableBitGrowth();
 
-			x += LX;
-			x += (mu-1); // x -= 1 for mu=0, x-=0 for mu=1
-			x += isOddRow.cast(x.getType()); // adjust for even/odd coordinate difference
-			x = mod(x, LX/2).cast(dfeUInt(MathUtils.bitsToAddress(LX/2)));
-		} else if (mu < 4) {
+		DFEVar numPipes_ = constant.var( dfeUInt( MathUtils.bitsToRepresent(m_numPipes)), m_numPipes);
 
-			y += LY;
-			y += (mu*2 - 5); // y -= 1 for mu=2, y+=1 for mu=3
-			y = mod(y, LY).cast(dfeUInt(MathUtils.bitsToAddress(LY)));
+		for (int pipe = 0 ; pipe < m_numPipes ; pipe ++ ) {
 
-		} else if (mu < 6) {
+			DFEVar pipe_ = constant.var( dfeUInt( MathUtils.bitsToRepresent(m_numPipes)), pipe);
 
-			z += LZ;
-			z += (mu*2 - 9); // x -= 1 for mu=4, x+=1 for mu=5
-			z = mod(z, LZ).cast(dfeUInt(MathUtils.bitsToAddress(LZ)));
+			optimization.pushEnableBitGrowth(true);
+			DFEVar mu = (iter * numPipes_ + pipe_) >> 1;
+			optimization.popEnableBitGrowth();
 
-		} else if (mu < 8) {
+			x = (mu === 0) ? xn : x;
+			x = (mu === 1) ? xp : x;
+			y = (mu === 2) ? yn : y;
+			y = (mu === 3) ? yp : y;
+			z = (mu === 4) ? zn : z;
+			z = (mu === 5) ? zp : z;
+			t = (mu === 6) ? tn : t;
+			t = (mu === 7) ? tp : t;
 
-			t += (mu*2 - 13); // t -= 1 for mu=6, t+=1 for mu=7
-			// no wrapping needed since halos exist along t direction
-
+			/*mu.simWatch("mu"+pipe);
+			t.simWatch("t_"+pipe);
+			z.simWatch("z_"+pipe);
+			y.simWatch("y_"+pipe);
+			x.simWatch("x_"+pipe);*/
+			addresses[pipe] = getAddress(t, z, y, x, iter);
+			//addresses[pipe].simWatch("address_"+pipe);
 		}
 
 
+		return addresses;
+
+	}
+
+	public DFEVar getAddress(DFEVar t, DFEVar z, DFEVar y, DFEVar x, DFEVar iter) {
 
 		DFEVar LZ_  = constant.var(dfeUInt(MathUtils.bitsToRepresent(LZ)),LZ);
 		DFEVar LY_  = constant.var(dfeUInt(MathUtils.bitsToRepresent(LY)),LY);
 		DFEVar LXH_ = constant.var(dfeUInt(MathUtils.bitsToRepresent(LX/2)),LX/2);
 
-		DFEVar address = ( ( ( t*LZ_ + z) * LY_ + y) * LXH_ + x );
+		optimization.pushEnableBitGrowth(true);
+
+		DFEVar address = ( ( ( ( t*LZ_ + z) * LY_ + y) * LXH_ + x) * m_vectorsPerSite + iter );
 		address = mod(address, bufferDepth);  //wrap around, whenever passed the buffer capacity
 
 		optimization.popEnableBitGrowth();
 		return address.cast(dfeUInt(MathUtils.bitsToAddress(bufferDepth)));
-
-	}
-
-	private DFEVar[] getWriteEnable() {
-
-		DFEVar[] writeEnable = new DFEVar[8];
-		for (int i=0 ; i<8 ; i++ ) {
-			writeEnable[i] = (write_mu === i);
-		}
-		return writeEnable;
-
 	}
 
 

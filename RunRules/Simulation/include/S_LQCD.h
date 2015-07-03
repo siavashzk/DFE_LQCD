@@ -6,9 +6,10 @@
 extern "C" {
 #endif /* __cplusplus */
 
-#define S_LQCD_LZ (8)
-#define S_LQCD_LY (6)
+#define S_LQCD_LZ (4)
+#define S_LQCD_LY (10)
 #define S_LQCD_LX (6)
+#define S_LQCD_loopOffset (15)
 #define S_LQCD_T (10)
 #define S_LQCD_PCIE_ALIGNMENT (16)
 
