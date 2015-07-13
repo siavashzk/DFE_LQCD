@@ -3,14 +3,17 @@ package s_lqcd;
 import com.maxeler.maxcompiler.v0.utils.MathUtils;
 import com.maxeler.maxcompiler.v2.kernelcompiler.Kernel;
 import com.maxeler.maxcompiler.v2.kernelcompiler.KernelLib;
+import com.maxeler.maxcompiler.v2.kernelcompiler.types.base.DFEType;
 import com.maxeler.maxcompiler.v2.kernelcompiler.types.composite.DFEComplex;
 import com.maxeler.maxcompiler.v2.kernelcompiler.types.composite.DFEComplexType;
 import com.maxeler.maxcompiler.v2.kernelcompiler.types.composite.DFEVectorType;
 
 public class QCDConstants extends KernelLib {
 
-	public int LX, LY, LZ, T, numPipes, loopOffset;
-	public static DFEComplexType dataType = new DFEComplexType(dfeFloat(8,24));
+	public int LX, LY, LZ, T, numPipes, loopOffset, halos;
+	S_LQCDKernel.EO ieo;
+	public static DFEType realType = dfeFloat(8,24);
+	public static DFEComplexType complexType = new DFEComplexType(realType);
 
 	protected QCDConstants (
 			Kernel owner,
@@ -19,7 +22,9 @@ public class QCDConstants extends KernelLib {
 			int LZ_,
 			int T_,
 			int numPipes_,
-			int loopOffset_) {
+			int loopOffset_,
+			int halos_,
+			S_LQCDKernel.EO ieo_) {
 		super(owner);
 		LX = LX_;
 		LY = LY_;
@@ -27,6 +32,8 @@ public class QCDConstants extends KernelLib {
 		T = T_;
 		numPipes = numPipes_;
 		loopOffset = loopOffset_;
+		halos = halos_;
+		ieo = ieo_;
 
 
 		if (T%2 != 0) {
@@ -62,25 +69,25 @@ public class QCDConstants extends KernelLib {
 
 	static public DFEVectorType<DFEComplex> getVectoredSpinorType () {
 		DFEVectorType<DFEComplex> type =
-			new DFEVectorType<DFEComplex>(dataType, 4*3);
+			new DFEVectorType<DFEComplex>(complexType, 4*3);
 		return type;
 	}
 
 	static public DFEVectorType<DFEComplex> getVectoredSu3Type () {
 		DFEVectorType<DFEComplex> type =
-			new DFEVectorType<DFEComplex>(dataType,9);
+			new DFEVectorType<DFEComplex>(complexType,9);
 		return type;
 	}
 
 	static public DFEVectorType<DFEComplex> getVectoredHalfSpinorType () {
 		DFEVectorType<DFEComplex> type =
-			new DFEVectorType<DFEComplex>(dataType, 2*3);
+			new DFEVectorType<DFEComplex>(complexType, 2*3);
 		return type;
 	}
 
 	static public DFEVectorType<DFEComplex> getVectoredSu3VectorType () {
 		DFEVectorType<DFEComplex> type =
-			new DFEVectorType<DFEComplex>(dataType, 3);
+			new DFEVectorType<DFEComplex>(complexType, 3);
 		return type;
 	}
 

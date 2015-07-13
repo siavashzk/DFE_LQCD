@@ -2,6 +2,8 @@ package s_lqcd;
 
 import com.maxeler.maxcompiler.v2.managers.BuildConfig;
 import com.maxeler.maxcompiler.v2.managers.custom.CustomManager;
+import com.maxeler.maxcompiler.v2.managers.custom.DFELink;
+import com.maxeler.maxcompiler.v2.managers.custom._CustomManagers;
 import com.maxeler.maxcompiler.v2.managers.custom.blocks.KernelBlock;
 import com.maxeler.maxcompiler.v2.managers.custom.stdlib.DebugLevel;
 import com.maxeler.maxcompiler.v2.managers.engine_interfaces.EngineInterface;
@@ -28,21 +30,27 @@ public class S_LQCDManager extends CustomManager {
 						engineParameters.getNumPipes(),
 						engineParameters.getLoopOffset(),
 						S_LQCDKernel.Mode.TIMES,
-						S_LQCDKernel.EO.ODDEVEN,
-						false
-				)
-		);
-		/*KernelBlock sub1block = addKernel(
-				new S_LQCDKernel(
-						makeKernelParameters(kernel_names[1]),
-						engineParameters.getL()+4,
-						engineParameters.getT()+4,
-						S_LQCDKernel.Mode.SUB,
 						S_LQCDKernel.EO.EVENODD,
+						2,
 						true
 				)
 		);
-		KernelBlock times2block = addKernel(
+		KernelBlock sub1block = addKernel(
+				new S_LQCDKernel(
+						makeKernelParameters(kernel_names[1]),
+						engineParameters.getT(),
+						engineParameters.getLX(),
+						engineParameters.getLY(),
+						engineParameters.getLZ(),
+						engineParameters.getNumPipes(),
+						engineParameters.getLoopOffset(),
+						S_LQCDKernel.Mode.SUB,
+						S_LQCDKernel.EO.ODDEVEN,
+						1,
+						false
+				)
+		);
+		/*KernelBlock times2block = addKernel(
 				new S_LQCDKernel(
 						makeKernelParameters(kernel_names[2]),
 						engineParameters.getL()+2,
@@ -66,6 +74,19 @@ public class S_LQCDManager extends CustomManager {
 		for (String inputName: times1block.getAllInputs())
 			times1block.getInput(inputName).connect(addStreamFromCPU(inputName));
 
+		DFELink x1 = times1block.getOutput("times1kernel_spinor_out");
+		_CustomManagers.setStreamBufferSpaceRequirement(x1, 1024*64*768);
+		sub1block.getInput("sub1kernel_spinor_in") <== x1;
+
+		DFELink x2 = times1block.getOutput("times1kernel_p_spinor_out");
+		_CustomManagers.setStreamBufferSpaceRequirement(x2, 1024*64*768);
+		sub1block.getInput("sub1kernel_p_spinor_in") <== x2;
+
+		//sub1block.getInput("sub1kernel_p_spinor_in") <== addStreamFromCPU("sub1kernel_p_spinor_in");
+
+		sub1block.getInput("sub1kernel_gauge0") <== addStreamFromCPU("sub1kernel_gauge0");
+		sub1block.getInput("sub1kernel_gauge1") <== addStreamFromCPU("sub1kernel_gauge1");
+
 		/*DFELink x1 = times1block.getOutput("times1kernel_spinor_out");
 		DFELink x2 = times1block.getOutput("times1kernel_p_spinor_out");
 		DFELink x3 = times1block.getOutput("times1kernel_gauge1_out");
@@ -81,25 +102,12 @@ public class S_LQCDManager extends CustomManager {
 		sub1block.getInput("sub1kernel_gauge0") <== x3;
 		sub1block.getInput("sub1kernel_gauge1") <== x4;*/
 
-		/*sub1block.getInput("sub1kernel_spinor_in") <== x1;
-		sub1block.getInput("sub1kernel_p_spinor_in") <== times1block.getOutput("times1kernel_p_spinor_out");
-		sub1block.getInput("sub1kernel_gauge0") <== times1block.getOutput("times1kernel_gauge1_out");
-		sub1block.getInput("sub1kernel_gauge1") <== times1block.getOutput("times1kernel_gauge0_out");*/
 
-		/*times2block.getInput("times2kernel_spinor_in") <== sub1block.getOutput("sub1kernel_spinor_out");
-		times2block.getInput("times2kernel_gauge0") <== sub1block.getOutput("sub1kernel_gauge1_out");
-		times2block.getInput("times2kernel_gauge1") <== sub1block.getOutput("sub1kernel_gauge0_out");
-
-		sub2block.getInput("sub2kernel_spinor_in") <== times2block.getOutput("times2kernel_spinor_out");
-		sub2block.getInput("sub2kernel_p_spinor_in") <== times2block.getOutput("times2kernel_p_spinor_out");
-		sub2block.getInput("sub2kernel_gauge0") <== times2block.getOutput("times2kernel_gauge1_out");
-		sub2block.getInput("sub2kernel_gauge1") <== times2block.getOutput("times2kernel_gauge0_out");
-*/
 		setParameter("quartus_map.ram_usage", "48000");
 		config.setAllowNonMultipleTransitions(true);
 
-		for (String outputName: times1block.getAllOutputs())
-			addStreamToCPU(outputName).connect(times1block.getOutput(outputName));
+		for (String outputName: sub1block.getAllOutputs())
+			addStreamToCPU(outputName).connect(sub1block.getOutput(outputName));
 
 
 		createSLiCinterface(
@@ -143,7 +151,8 @@ public class S_LQCDManager extends CustomManager {
 		int VH3 = getVolumeWithHalos(LX,T,2);
 		int VH4 = getVolumeWithHalos(LX,T,1);*/
 
-		engine_interface.setTicks("times1kernel", 16/numPipes * ( (T+2)*LX*LY*LZ/2 +  loopOffset) + 2);
+		engine_interface.setTicks("times1kernel", 16/numPipes * ( (T+4)*LX*LY*LZ/2 +  loopOffset) + 2);
+		engine_interface.setTicks("sub1kernel",   16/numPipes * ( (T+2)*LX*LY*LZ/2 +  loopOffset) + 2);
 		//engine_interface.setTicks("sub1kernel", VH2);
 		//engine_interface.setTicks("times2kernel", VH3);
 		//engine_interface.setTicks("sub2kernel", VH4);

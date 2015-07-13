@@ -1,6 +1,7 @@
 package s_lqcd;
 
 import com.maxeler.maxcompiler.v2.kernelcompiler.KernelLib;
+import com.maxeler.maxcompiler.v2.kernelcompiler.types.base.DFEVar;
 import com.maxeler.maxcompiler.v2.kernelcompiler.types.composite.DFEComplex;
 import com.maxeler.maxcompiler.v2.kernelcompiler.types.composite.DFEComplexType;
 import com.maxeler.maxcompiler.v2.kernelcompiler.types.composite.DFEVector;
@@ -15,7 +16,7 @@ public class DFESu3Vector extends KernelLib {
 	protected DFESu3Vector(QCDConstants constants) {
 		super(constants.getKernel());
 		m_constants = constants;
-		m_cplxType = QCDConstants.dataType;
+		m_cplxType = QCDConstants.complexType;
 		c0 = m_cplxType.newInstance(constants.getKernel());
 		c1 = m_cplxType.newInstance(constants.getKernel());
 		c2 = m_cplxType.newInstance(constants.getKernel());
@@ -24,23 +25,23 @@ public class DFESu3Vector extends KernelLib {
 	protected DFESu3Vector(QCDConstants constants, int real, int imag) {
 		super(constants.getKernel());
 		m_constants = constants;
-		m_cplxType = QCDConstants.dataType;
+		m_cplxType = QCDConstants.complexType;
 		c0 = m_cplxType.newInstance(constants.getKernel());
 		c1 = m_cplxType.newInstance(constants.getKernel());
 		c2 = m_cplxType.newInstance(constants.getKernel());
 
-		c0.setReal(constant.var(dfeFloat(8,24),real));
-		c0.setImaginary(constant.var(dfeFloat(8,24),imag));
-		c1.setReal(constant.var(dfeFloat(8,24),real));
-		c1.setImaginary(constant.var(dfeFloat(8,24),imag));
-		c2.setReal(constant.var(dfeFloat(8,24),real));
-		c2.setImaginary(constant.var(dfeFloat(8,24),imag));
+		c0.setReal(     constant.var(QCDConstants.realType,real));
+		c0.setImaginary(constant.var(QCDConstants.realType,imag));
+		c1.setReal(     constant.var(QCDConstants.realType,real));
+		c1.setImaginary(constant.var(QCDConstants.realType,imag));
+		c2.setReal(     constant.var(QCDConstants.realType,real));
+		c2.setImaginary(constant.var(QCDConstants.realType,imag));
 	}
 
 	protected DFESu3Vector(QCDConstants constants, DFEVector<DFEComplex> su3vec) {
 		super(constants.getKernel());
 		m_constants = constants;
-		m_cplxType = QCDConstants.dataType;
+		m_cplxType = QCDConstants.complexType;
 
 		c0 = su3vec[0];
 		c1 = su3vec[1];
@@ -106,6 +107,14 @@ public class DFESu3Vector extends KernelLib {
 		temp.c0 = c0;
 		temp.c1 = c1;
 		temp.c2 = c2;
+		return temp;
+	}
+
+	DFESu3Vector mul (DFEVar a) {
+		DFESu3Vector temp = new DFESu3Vector(m_constants);
+		temp.c0 = a * c0;
+		temp.c1 = a * c1;
+		temp.c2 = a * c2;
 		return temp;
 	}
 

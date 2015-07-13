@@ -55,13 +55,13 @@ public class HalfSpinorBuffer extends KernelLib {
 
 		writeEnable = dfeBool().newInstance(owner);
 
-		write_t    = dfeUInt(MathUtils.bitsToAddress(T+2)) .newInstance(owner);
+		write_t    = dfeUInt(MathUtils.bitsToAddress(T+2*m_constants.halos)) .newInstance(owner);
 		write_z    = dfeUInt(MathUtils.bitsToAddress(LZ))  .newInstance(owner);
 		write_y    = dfeUInt(MathUtils.bitsToAddress(LY))  .newInstance(owner);
 		write_x    = dfeUInt(MathUtils.bitsToAddress(LX/2)).newInstance(owner);
 		write_iter = dfeUInt(MathUtils.bitsToAddress(m_vectorsPerSite)).newInstance(owner);
 
-		read_t    = dfeUInt(MathUtils.bitsToAddress(T+2)) .newInstance(owner);
+		read_t    = dfeUInt(MathUtils.bitsToAddress(T+2*m_constants.halos)) .newInstance(owner);
 		read_z    = dfeUInt(MathUtils.bitsToAddress(LZ))  .newInstance(owner);
 		read_y    = dfeUInt(MathUtils.bitsToAddress(LY))  .newInstance(owner);
 		read_x    = dfeUInt(MathUtils.bitsToAddress(LX/2)).newInstance(owner);
@@ -113,45 +113,6 @@ public class HalfSpinorBuffer extends KernelLib {
 	public DFESu3Vector getBufferOut (int pipe) {
 		return m_bufferOut[pipe];
 	}
-	/*public DFESu3Vector getBufferOut (DFEVar mu) {
-		DFEQCDSelector mub2 = new DFEQCDSelector (m_constants, (mu&4)===4 );
-		DFEQCDSelector mub1 = new DFEQCDSelector (m_constants, (mu&2)===2 );
-		DFEQCDSelector mub0 = new DFEQCDSelector (m_constants, (mu&1)===1 );
-
-		//DFEHalfSpinor out = new DFEHalfSpinor(m_scalars.getKernel());
-
-		// TODO Is there a better way to do this? Maybe define an 8-way mux
-		// for the classes
-		DFEHalfSpinor out =
-			mub2 ? (
-				mub1 ? (
-					mub0 ?
-						m_bufferOut[7]  // mu = 3'b111
-							:
-						m_bufferOut[6]  // mu = 3'b110
-				) : (
-					mub0 ?
-						m_bufferOut[5]  // mu = 3'b101
-						:
-						m_bufferOut[4]  // mu = 3'b100
-				)
-			) : (
-				mub1 ? (
-					mub0 ?
-						m_bufferOut[3]  // mu = 3'b011
-							:
-						m_bufferOut[2]  // mu = 3'b010
-					) : (
-					mub0 ?
-						m_bufferOut[1]  // mu = 3'b001
-							:
-						m_bufferOut[0]  // mu = 3'b000
-					)
-			);
-
-		return out;
-	}*/
-
 
 	private DFEVar mod(DFEVar dividend, int divisor) {
 		if (MathUtils.isPowerOf2(divisor)) {
@@ -225,7 +186,10 @@ public class HalfSpinorBuffer extends KernelLib {
 		DFEVar isOddRow =
 			(t&1).cast(dfeBool()) ^
 			(z&1).cast(dfeBool()) ^
-			(y&1).cast(dfeBool()) ^ 1;
+			(y&1).cast(dfeBool()) ^
+			(m_constants.halos&1);
+		if (m_constants.ieo == S_LQCDKernel.EO.EVENODD) isOddRow ^= 1;
+
 		DFEVar xn = mod(x + LX - 1 + isOddRow, LX/2)
 		            .cast(dfeUInt(MathUtils.bitsToAddress(LX/2)));
 		DFEVar xp = mod(x + LX + 0 + isOddRow, LX/2)
@@ -234,8 +198,8 @@ public class HalfSpinorBuffer extends KernelLib {
 		DFEVar yp = mod(y + 1, LY).cast(dfeUInt(MathUtils.bitsToAddress(LY)));
 		DFEVar zn = mod(z - 1, LZ).cast(dfeUInt(MathUtils.bitsToAddress(LZ)));
 		DFEVar zp = mod(z + 1, LZ).cast(dfeUInt(MathUtils.bitsToAddress(LZ)));
-		DFEVar tn = (t - 1).cast(dfeUInt(MathUtils.bitsToAddress(T+2)));
-		DFEVar tp = (t + 1).cast(dfeUInt(MathUtils.bitsToAddress(T+2)));
+		DFEVar tn = (t - 1).cast(dfeUInt(MathUtils.bitsToAddress(T+2*m_constants.halos)));
+		DFEVar tp = (t + 1).cast(dfeUInt(MathUtils.bitsToAddress(T+2*m_constants.halos)));
 
 		optimization.popEnableBitGrowth();
 

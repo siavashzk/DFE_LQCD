@@ -24,24 +24,46 @@ extern "C" {
 /**
  * \brief Basic static function for the interface 'default'.
  * 
+ * \param [in] inscalar_sub1kernel_alpha Input scalar parameter "sub1kernel.alpha".
+ * \param [in] inscalar_sub1kernel_beta_s Input scalar parameter "sub1kernel.beta_s".
+ * \param [in] inscalar_sub1kernel_beta_t_b Input scalar parameter "sub1kernel.beta_t_b".
+ * \param [in] inscalar_sub1kernel_beta_t_f Input scalar parameter "sub1kernel.beta_t_f".
+ * \param [in] inscalar_times1kernel_beta_s Input scalar parameter "times1kernel.beta_s".
+ * \param [in] inscalar_times1kernel_beta_t_b Input scalar parameter "times1kernel.beta_t_b".
+ * \param [in] inscalar_times1kernel_beta_t_f Input scalar parameter "times1kernel.beta_t_f".
+ * \param [in] instream_sub1kernel_gauge0 Stream "sub1kernel_gauge0".
+ * \param [in] instream_size_sub1kernel_gauge0 The size of the stream instream_sub1kernel_gauge0 in bytes.
+ * \param [in] instream_sub1kernel_gauge1 Stream "sub1kernel_gauge1".
+ * \param [in] instream_size_sub1kernel_gauge1 The size of the stream instream_sub1kernel_gauge1 in bytes.
  * \param [in] instream_times1kernel_gauge0 Stream "times1kernel_gauge0".
  * \param [in] instream_size_times1kernel_gauge0 The size of the stream instream_times1kernel_gauge0 in bytes.
  * \param [in] instream_times1kernel_gauge1 Stream "times1kernel_gauge1".
  * \param [in] instream_size_times1kernel_gauge1 The size of the stream instream_times1kernel_gauge1 in bytes.
  * \param [in] instream_times1kernel_spinor_in Stream "times1kernel_spinor_in".
  * \param [in] instream_size_times1kernel_spinor_in The size of the stream instream_times1kernel_spinor_in in bytes.
- * \param [out] outstream_times1kernel_spinor_out Stream "times1kernel_spinor_out".
- * \param [in] outstream_size_times1kernel_spinor_out The size of the stream outstream_times1kernel_spinor_out in bytes.
+ * \param [out] outstream_sub1kernel_spinor_out Stream "sub1kernel_spinor_out".
+ * \param [in] outstream_size_sub1kernel_spinor_out The size of the stream outstream_sub1kernel_spinor_out in bytes.
  */
 void S_LQCD(
+	double inscalar_sub1kernel_alpha,
+	double inscalar_sub1kernel_beta_s,
+	double inscalar_sub1kernel_beta_t_b,
+	double inscalar_sub1kernel_beta_t_f,
+	double inscalar_times1kernel_beta_s,
+	double inscalar_times1kernel_beta_t_b,
+	double inscalar_times1kernel_beta_t_f,
+	const void *instream_sub1kernel_gauge0,
+	size_t instream_size_sub1kernel_gauge0,
+	const void *instream_sub1kernel_gauge1,
+	size_t instream_size_sub1kernel_gauge1,
 	const void *instream_times1kernel_gauge0,
 	size_t instream_size_times1kernel_gauge0,
 	const void *instream_times1kernel_gauge1,
 	size_t instream_size_times1kernel_gauge1,
 	const void *instream_times1kernel_spinor_in,
 	size_t instream_size_times1kernel_spinor_in,
-	void *outstream_times1kernel_spinor_out,
-	size_t outstream_size_times1kernel_spinor_out);
+	void *outstream_sub1kernel_spinor_out,
+	size_t outstream_size_sub1kernel_spinor_out);
 
 /**
  * \brief Basic static non-blocking function for the interface 'default'.
@@ -51,39 +73,72 @@ void S_LQCD(
  * note that one of these *must* be called, so that associated memory can be released.
  * 
  * 
+ * \param [in] inscalar_sub1kernel_alpha Input scalar parameter "sub1kernel.alpha".
+ * \param [in] inscalar_sub1kernel_beta_s Input scalar parameter "sub1kernel.beta_s".
+ * \param [in] inscalar_sub1kernel_beta_t_b Input scalar parameter "sub1kernel.beta_t_b".
+ * \param [in] inscalar_sub1kernel_beta_t_f Input scalar parameter "sub1kernel.beta_t_f".
+ * \param [in] inscalar_times1kernel_beta_s Input scalar parameter "times1kernel.beta_s".
+ * \param [in] inscalar_times1kernel_beta_t_b Input scalar parameter "times1kernel.beta_t_b".
+ * \param [in] inscalar_times1kernel_beta_t_f Input scalar parameter "times1kernel.beta_t_f".
+ * \param [in] instream_sub1kernel_gauge0 Stream "sub1kernel_gauge0".
+ * \param [in] instream_size_sub1kernel_gauge0 The size of the stream instream_sub1kernel_gauge0 in bytes.
+ * \param [in] instream_sub1kernel_gauge1 Stream "sub1kernel_gauge1".
+ * \param [in] instream_size_sub1kernel_gauge1 The size of the stream instream_sub1kernel_gauge1 in bytes.
  * \param [in] instream_times1kernel_gauge0 Stream "times1kernel_gauge0".
  * \param [in] instream_size_times1kernel_gauge0 The size of the stream instream_times1kernel_gauge0 in bytes.
  * \param [in] instream_times1kernel_gauge1 Stream "times1kernel_gauge1".
  * \param [in] instream_size_times1kernel_gauge1 The size of the stream instream_times1kernel_gauge1 in bytes.
  * \param [in] instream_times1kernel_spinor_in Stream "times1kernel_spinor_in".
  * \param [in] instream_size_times1kernel_spinor_in The size of the stream instream_times1kernel_spinor_in in bytes.
- * \param [out] outstream_times1kernel_spinor_out Stream "times1kernel_spinor_out".
- * \param [in] outstream_size_times1kernel_spinor_out The size of the stream outstream_times1kernel_spinor_out in bytes.
+ * \param [out] outstream_sub1kernel_spinor_out Stream "sub1kernel_spinor_out".
+ * \param [in] outstream_size_sub1kernel_spinor_out The size of the stream outstream_sub1kernel_spinor_out in bytes.
  * \return A handle on the execution status, or NULL in case of error.
  */
 max_run_t *S_LQCD_nonblock(
+	double inscalar_sub1kernel_alpha,
+	double inscalar_sub1kernel_beta_s,
+	double inscalar_sub1kernel_beta_t_b,
+	double inscalar_sub1kernel_beta_t_f,
+	double inscalar_times1kernel_beta_s,
+	double inscalar_times1kernel_beta_t_b,
+	double inscalar_times1kernel_beta_t_f,
+	const void *instream_sub1kernel_gauge0,
+	size_t instream_size_sub1kernel_gauge0,
+	const void *instream_sub1kernel_gauge1,
+	size_t instream_size_sub1kernel_gauge1,
 	const void *instream_times1kernel_gauge0,
 	size_t instream_size_times1kernel_gauge0,
 	const void *instream_times1kernel_gauge1,
 	size_t instream_size_times1kernel_gauge1,
 	const void *instream_times1kernel_spinor_in,
 	size_t instream_size_times1kernel_spinor_in,
-	void *outstream_times1kernel_spinor_out,
-	size_t outstream_size_times1kernel_spinor_out);
+	void *outstream_sub1kernel_spinor_out,
+	size_t outstream_size_sub1kernel_spinor_out);
 
 /**
  * \brief Advanced static interface, structure for the engine interface 'default'
  * 
  */
 typedef struct { 
+	double inscalar_sub1kernel_alpha; /**<  [in] Input scalar parameter "sub1kernel.alpha". */
+	double inscalar_sub1kernel_beta_s; /**<  [in] Input scalar parameter "sub1kernel.beta_s". */
+	double inscalar_sub1kernel_beta_t_b; /**<  [in] Input scalar parameter "sub1kernel.beta_t_b". */
+	double inscalar_sub1kernel_beta_t_f; /**<  [in] Input scalar parameter "sub1kernel.beta_t_f". */
+	double inscalar_times1kernel_beta_s; /**<  [in] Input scalar parameter "times1kernel.beta_s". */
+	double inscalar_times1kernel_beta_t_b; /**<  [in] Input scalar parameter "times1kernel.beta_t_b". */
+	double inscalar_times1kernel_beta_t_f; /**<  [in] Input scalar parameter "times1kernel.beta_t_f". */
+	const void *instream_sub1kernel_gauge0; /**<  [in] Stream "sub1kernel_gauge0". */
+	size_t instream_size_sub1kernel_gauge0; /**<  [in] The size of the stream instream_sub1kernel_gauge0 in bytes. */
+	const void *instream_sub1kernel_gauge1; /**<  [in] Stream "sub1kernel_gauge1". */
+	size_t instream_size_sub1kernel_gauge1; /**<  [in] The size of the stream instream_sub1kernel_gauge1 in bytes. */
 	const void *instream_times1kernel_gauge0; /**<  [in] Stream "times1kernel_gauge0". */
 	size_t instream_size_times1kernel_gauge0; /**<  [in] The size of the stream instream_times1kernel_gauge0 in bytes. */
 	const void *instream_times1kernel_gauge1; /**<  [in] Stream "times1kernel_gauge1". */
 	size_t instream_size_times1kernel_gauge1; /**<  [in] The size of the stream instream_times1kernel_gauge1 in bytes. */
 	const void *instream_times1kernel_spinor_in; /**<  [in] Stream "times1kernel_spinor_in". */
 	size_t instream_size_times1kernel_spinor_in; /**<  [in] The size of the stream instream_times1kernel_spinor_in in bytes. */
-	void *outstream_times1kernel_spinor_out; /**<  [out] Stream "times1kernel_spinor_out". */
-	size_t outstream_size_times1kernel_spinor_out; /**<  [in] The size of the stream outstream_times1kernel_spinor_out in bytes. */
+	void *outstream_sub1kernel_spinor_out; /**<  [out] Stream "sub1kernel_spinor_out". */
+	size_t outstream_size_sub1kernel_spinor_out; /**<  [in] The size of the stream outstream_sub1kernel_spinor_out in bytes. */
 } S_LQCD_actions_t;
 
 /**

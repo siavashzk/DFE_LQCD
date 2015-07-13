@@ -46,6 +46,17 @@ public class DFEQCDSelector extends KernelLib {
 		return temp;
 	}
 
+	public DFESpinor ternaryIf(DFESpinor a, DFESpinor b) {
+		DFESpinor temp = new DFESpinor(m_constants);
+
+		temp.s0 = this ? a.s0 : b.s0;
+		temp.s1 = this ? a.s1 : b.s1;
+		temp.s2 = this ? a.s2 : b.s2;
+		temp.s3 = this ? a.s3 : b.s3;
+
+		return temp;
+	}
+
 	public DFESu3Vector ternaryIf(DFESu3Vector a, DFESu3Vector b) {
 		DFESu3Vector temp = new DFESu3Vector(m_constants);
 

@@ -20,7 +20,7 @@ public class DFESu3 extends KernelLib  {
 	protected DFESu3(QCDConstants constants) {
 		super(constants.getKernel());
 		m_constants = constants;
-		m_cplxType = QCDConstants.dataType;
+		m_cplxType = QCDConstants.complexType;
 		c00 = m_cplxType.newInstance(constants.getKernel());
 		c01 = m_cplxType.newInstance(constants.getKernel());
 		c02 = m_cplxType.newInstance(constants.getKernel());
@@ -35,7 +35,7 @@ public class DFESu3 extends KernelLib  {
 	protected DFESu3(QCDConstants constants, DFEVector<DFEComplex> su3) {
 		super(constants.getKernel());
 		m_constants = constants;
-		m_cplxType = QCDConstants.dataType;
+		m_cplxType = QCDConstants.complexType;
 
 		/*c00 = m_cplxType.newInstance(constants.getKernel());
 		c01 = m_cplxType.newInstance(constants.getKernel());

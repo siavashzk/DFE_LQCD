@@ -9,8 +9,6 @@
 #define TEST_MAIN
 #include "su3.h"
 #include "global.h"
-#include "geometry.h"
-#include "hopping.h"
 
 void create_random_input(spinor* s, su3* u);
 void create_random_spinor(spinor * s);
@@ -25,27 +23,26 @@ void read_spinor(char * filename, spinor *out);
 void read_gauge(char * filename, su3 *s);
 void reorganize_ueven (su3 *out, su3 *in);
 void reorganize_back_ueven (su3 *out, su3 *in);
-void devide_gauge_to_oddeven(su3 const * const in, su3 * const even, su3 * const odd);
+void devide_gauge_to_oddeven(su3 const * const in, su3 * const even, su3 * const odd, int ieo);
 void add_1d_halos_spinor(spinor* with_halos, spinor* orig, int halos);
 void add_1d_halos_gauge(su3* with_halos, su3* orig, int halos);
 void print_spinors (spinor* s);
 void print_gauges (su3* s);
-int verify_results (spinor* dfe_out, spinor *expected_out);
+int verify_results (spinor* dfe_out, spinor *expected_out, int V);
 
 int main(void) {
 
-	//L = 4;
 	T = S_LQCD_T;
 	LX = S_LQCD_LX;
 	LY = S_LQCD_LY;
 	LZ  = S_LQCD_LZ;
 	VOLUME = LZ * LY * LX * T;
-	int VOLUMEH1 = (LZ/2) * (LX) * (LY) * (T+2);
+	int VOLUMEH1 = (LX/2) * (LY) * (LZ) * (T+4);
+	int VOLUMEH2 = (LX/2) * (LY) * (LZ) * (T+2);
 
-	spinor *in, *out, *out_dfe, *out_expected;
-	su3 *uodd, *ueven, *u, *ueven_;
-
-	ka3 = ka2 = ka1 = ka0 = 1 + I*0;
+	spinor *in, *out, *out_dfe, *out_expected, *tmp;
+	su3 *uodd0, *ueven0, *u0;
+	su3 *uodd1, *ueven1, *u1;
 
 	printf("Allocating memory for data ... \n");
 
@@ -53,21 +50,30 @@ int main(void) {
 	out = &in[VOLUME / 2];
 	out_dfe = malloc(VOLUMEH1 * sizeof(spinor));
 	out_expected = malloc(VOLUME/2 * sizeof(spinor));
-	ueven = malloc(VOLUME * 4 * sizeof(su3));
-	uodd = &ueven[VOLUME / 2 * 4];
-	ueven_ = malloc(VOLUME/2 * 4 * sizeof(su3));
-	u = malloc (VOLUME / 2 * 8 * sizeof(su3));
 
-	spinor *in_halos = malloc(VOLUMEH1 * sizeof(spinor));
+
+	tmp = malloc(VOLUME/2 * sizeof(spinor));
+
+	ueven0 = malloc(VOLUME * 4 * sizeof(su3));
+	uodd0 = &ueven0[VOLUME / 2 * 4];
+	u0 = malloc (VOLUME / 2 * 8 * sizeof(su3));
+	ueven1 = malloc(VOLUME * 4 * sizeof(su3));
+	uodd1 = &ueven1[VOLUME / 2 * 4];
+	u1 = malloc (VOLUME / 2 * 8 * sizeof(su3));
+
+	spinor *in_halos  = malloc(VOLUMEH1 * sizeof(spinor));
+	su3 *uodd0_halos   = malloc(VOLUMEH2 * 4 * sizeof(spinor));
+	su3 *ueven0_halos  = malloc(VOLUMEH2 * 4 * sizeof(spinor));
 	//spinor *out_halos = malloc(VOLUMEH2 * sizeof(spinor));
-	su3 *uodd_halos  = malloc(VOLUMEH1 * 4 * sizeof(spinor));
-	su3 *ueven_halos_  = malloc(VOLUMEH1 * 4 * sizeof(spinor));
-	//su3 *ueven_halos  = malloc(VOLUME * 4 * sizeof(spinor));
+
+	su3 *uodd1_halos   = malloc(VOLUMEH1 * 4 * sizeof(spinor));
+	su3 *ueven1_halos  = malloc(VOLUMEH1 * 4 * sizeof(spinor));
 
 	printf("Done!\n");
-	printf("Creating random spinor and gauge inputs ... \n");
 
-	/*for (int i=0 ; i<VOLUME/2 ; i++ ) {
+	/*printf("Creating random spinor and gauge inputs ... \n");
+
+	for (int i=0 ; i<VOLUME/2 ; i++ ) {
 		create_random_spinor(in + i);
 	}
 	for (int i=0 ; i<VOLUME*2 ; i++ ) {
@@ -76,40 +82,29 @@ int main(void) {
 	}
 
 	printf("Done!\n");*/
+
 	printf("Reading spinor and gauge inputs ... \n");
 
+	read_spinor("tmp_spinor.txt", tmp);
 	read_spinor("in_spinor.txt", in);
 	read_spinor("out_spinor.txt", out_expected);
-	read_gauge("in_gauge0.txt", u);
+	read_gauge("in_gauge0.txt", u0);
+	read_gauge("in_gauge1.txt", u1);
 
 	printf("Done!\n");
 	printf("Data reordering and adding necessary halos ... \n");
 
-	devide_gauge_to_oddeven(u, ueven_, uodd);
-	//reorganize_back_ueven(ueven, ueven_);
+	devide_gauge_to_oddeven(u0, ueven0, uodd0, 0);
+	devide_gauge_to_oddeven(u1, ueven1, uodd1, 1);
 
+	add_1d_halos_spinor(in_halos,   in,    2);
+	add_1d_halos_gauge(uodd1_halos,  uodd1,  2);
+	add_1d_halos_gauge(ueven1_halos, ueven1, 2);
 
-	//print_spinors (in);
-	//print_gauges (uodd);
-	//print_gauges (ueven);
-
-	//reorganize_ueven(ueven_, ueven);
-
-	add_1d_halos_spinor(in_halos, in, 1);
-	add_1d_halos_gauge(uodd_halos, uodd, 1);
-	add_1d_halos_gauge(ueven_halos_, ueven_, 1);
+	add_1d_halos_gauge(uodd0_halos,  uodd0,  1);
+	add_1d_halos_gauge(ueven0_halos, ueven0, 1);
 
 	printf("Done!\n");
-	/*printf("Initializing CPU LQCD  ... \n");
-
-	init_geometry();
-
-	printf("Done!\n");
-	printf("Running CPU LQCD  ... \n");
-
-	Qtm_pm_psi(out, in, uodd, ueven, 1 + 0*I, 1 + 0*I);
-
-	printf("Done!\n");*/
 	printf("Setting up DFE SLIC  ... \n");
 
 	max_file_t *maxfile = S_LQCD_init();
@@ -117,14 +112,23 @@ int main(void) {
 
 	max_actions_t* act = max_actions_init(maxfile, "default");
 
-	//max_set_param_double(act, "ka", 1);
-	//max_set_param_double(act, "cfactor", 1);
+	max_set_double(act, "times1kernel", "beta_s", -.5);
+	max_set_double(act, "times1kernel", "beta_t_b", 0.3);
+	max_set_double(act, "times1kernel", "beta_t_f", 0.3);
+
+	max_set_double(act, "sub1kernel", "alpha", 4.1);
+	max_set_double(act, "sub1kernel", "beta_s", -.5 / 16.4);
+	max_set_double(act, "sub1kernel", "beta_t_b", 0.3 / 16.4);
+	max_set_double(act, "sub1kernel", "beta_t_f", 0.3 / 16.4);
 
 	max_queue_input(act, "times1kernel_spinor_in", in_halos, VOLUMEH1 * sizeof(spinor));
-	max_queue_input(act, "times1kernel_gauge0", uodd_halos, VOLUMEH1 * 4 * sizeof(su3));
-	max_queue_input(act, "times1kernel_gauge1", ueven_halos_, VOLUMEH1 * 4 * sizeof(su3));
+	max_queue_input(act, "times1kernel_gauge0", uodd1_halos, VOLUMEH1 * 4 * sizeof(su3));
+	max_queue_input(act, "times1kernel_gauge1", ueven1_halos, VOLUMEH1 * 4 * sizeof(su3));
 
-	max_queue_output(act, "times1kernel_spinor_out", out_dfe,  VOLUME/2 * sizeof(spinor));
+	max_queue_input(act, "sub1kernel_gauge0", uodd0_halos, VOLUMEH2 * 4 * sizeof(su3));
+	max_queue_input(act, "sub1kernel_gauge1", ueven0_halos, VOLUMEH2 * 4 * sizeof(su3));
+
+	max_queue_output(act, "sub1kernel_spinor_out", out_dfe,  VOLUME/2 * sizeof(spinor));
 
 	printf("Done!\n");
 	printf("Running LQCD on DFE ...\n");
@@ -135,13 +139,11 @@ int main(void) {
 	printf("Done!\n");
 	printf("Verifying LQCD output ...\n");
 
-	//add_4d_halos_spinor(out_halos, out, 3, 1);
-
-	return  verify_results(out_dfe, out_expected);
+	return  verify_results(out_dfe, out_expected, VOLUME/2);
 }
 
-int verify_results (spinor* dfe_out, spinor *expected_out) {
-	for (int i=0 ; i<VOLUME/2 ; i++ ) {
+int verify_results (spinor* dfe_out, spinor *expected_out, int V) {
+	for (int i=0 ; i<V ; i++ ) {
 		int error = compare_spinor(expected_out+i , dfe_out+i);
 		if (error) {
 			printf("Wrong %d! %d\n", error,i);
@@ -479,7 +481,7 @@ void reorganize_back_ueven (su3 *out, su3 *in) {
 /* Converting from qphix style gauge for the whole lattice, to even/odd separated
  * tmLQCD style gauge fields
  */
-void devide_gauge_to_oddeven(su3 const * const in, su3 * const even, su3 * const odd) {
+void devide_gauge_to_oddeven(su3 const * const in, su3 * const even, su3 * const odd, int ieo) {
 	int i = 0;
 	for (int t=0 ; t<T ; t++ ) {
 		for (int z=0 ; z<LZ ; z++ ) {
@@ -489,7 +491,7 @@ void devide_gauge_to_oddeven(su3 const * const in, su3 * const even, su3 * const
 						for (int f=-1; f<=1 ; f+= 2) {
 							su3 tmp = in[i];
 
-							int isOddRow = (t & 1) ^ (z & 1) ^ (y & 1);
+							int isOddRow = (t & 1) ^ (z & 1) ^ (y & 1) ^ ieo;
 
 							/*int mu_ = (mu+1)%4;
 							int t_ = t;               // converting from checkerboarded

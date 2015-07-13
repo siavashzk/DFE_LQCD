@@ -1,6 +1,7 @@
 package s_lqcd;
 
 import com.maxeler.maxcompiler.v2.kernelcompiler.KernelLib;
+import com.maxeler.maxcompiler.v2.kernelcompiler.types.base.DFEVar;
 import com.maxeler.maxcompiler.v2.kernelcompiler.types.composite.DFEComplex;
 import com.maxeler.maxcompiler.v2.kernelcompiler.types.composite.DFEVector;
 
@@ -74,6 +75,31 @@ public class DFESpinor extends KernelLib {
 		temp.s2 = s2 + a.s2;
 		temp.s3 = s3 + a.s3;
 		return temp;
+	}
+
+	public DFESpinor mul (DFEVar a) {
+		DFESpinor temp = new DFESpinor(m_constants);
+		temp.s0 = s0 * a;
+		temp.s1 = s1 * a;
+		temp.s2 = s2 * a;
+		temp.s3 = s3 * a;
+		return temp;
+	}
+
+	public DFESpinor neg () {
+		DFESpinor temp = new DFESpinor(m_constants);
+		temp.s0 = -s0;
+		temp.s1 = -s1;
+		temp.s2 = -s2;
+		temp.s3 = -s3;
+		return temp;
+	}
+
+	public void connect (DFESpinor a) {
+		s0 <== a.s0;
+		s1 <== a.s1;
+		s2 <== a.s2;
+		s3 <== a.s3;
 	}
 
 	public DFEVector<DFEComplex> convertToDFEVector () {
