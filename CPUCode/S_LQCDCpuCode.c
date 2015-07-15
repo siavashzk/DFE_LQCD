@@ -24,6 +24,7 @@ void read_gauge(char * filename, su3 *s);
 void reorganize_ueven (su3 *out, su3 *in);
 void reorganize_back_ueven (su3 *out, su3 *in);
 void devide_gauge_to_oddeven(su3 const * const in, su3 * const even, su3 * const odd, int ieo);
+void reorganize_gauge(su3 const * const in, su3 * const out, int ieo);
 void add_1d_halos_spinor(spinor* with_halos, spinor* orig, int halos);
 void add_1d_halos_gauge(su3* with_halos, su3* orig, int halos);
 void print_spinors (spinor* s);
@@ -37,14 +38,17 @@ int main(void) {
 	LY = S_LQCD_LY;
 	LZ  = S_LQCD_LZ;
 	VOLUME = LZ * LY * LX * T;
-	int VOLUMEH1 = (LX/2) * (LY) * (LZ) * (T+4);
+	int VOLUMEH1 = (LX/2) * (LY) * (LZ) * (T+2);
 	int VOLUMEH2 = (LX/2) * (LY) * (LZ) * (T+2);
 
-	spinor *in, *out, *out_dfe, *out_expected, *tmp;
-	su3 *uodd0, *ueven0, *u0;
-	su3 *uodd1, *ueven1, *u1;
+	NUM_PIPES = S_LQCD_numPipes;
+	LOOP_OFFSET = S_LQCD_loopOffset;
 
-	printf("Allocating memory for data ... \n");
+	spinor *in, *out, *out_dfe, *out_expected, *tmp;
+	su3 *u0, *u0_re;
+	su3 *u1, *u1_re;
+
+	printf("Allocating memory for data ...");
 
 	in = malloc(VOLUME * sizeof(spinor));
 	out = &in[VOLUME / 2];
@@ -54,24 +58,24 @@ int main(void) {
 
 	tmp = malloc(VOLUME/2 * sizeof(spinor));
 
-	ueven0 = malloc(VOLUME * 4 * sizeof(su3));
-	uodd0 = &ueven0[VOLUME / 2 * 4];
-	u0 = malloc (VOLUME / 2 * 8 * sizeof(su3));
-	ueven1 = malloc(VOLUME * 4 * sizeof(su3));
-	uodd1 = &ueven1[VOLUME / 2 * 4];
-	u1 = malloc (VOLUME / 2 * 8 * sizeof(su3));
+	u0 = malloc (VOLUME * 8 * sizeof(su3));
+	u0_re = &u0[VOLUME/2 * 8];
+	u1 = malloc (VOLUME * 8 * sizeof(su3));
+	u1_re = &u1[VOLUME/2 * 8];
 
 	spinor *in_halos  = malloc(VOLUMEH1 * sizeof(spinor));
-	su3 *uodd0_halos   = malloc(VOLUMEH2 * 4 * sizeof(spinor));
-	su3 *ueven0_halos  = malloc(VOLUMEH2 * 4 * sizeof(spinor));
+	su3 *u0_halos      = malloc(VOLUMEH2 * 8 * sizeof(spinor));
+	//su3 *uodd0_halos   = malloc(VOLUMEH2 * 4 * sizeof(spinor));
+	//su3 *ueven0_halos  = malloc(VOLUMEH2 * 4 * sizeof(spinor));
 	//spinor *out_halos = malloc(VOLUMEH2 * sizeof(spinor));
 
-	su3 *uodd1_halos   = malloc(VOLUMEH1 * 4 * sizeof(spinor));
-	su3 *ueven1_halos  = malloc(VOLUMEH1 * 4 * sizeof(spinor));
+	su3 *u1_halos      = malloc(VOLUMEH1 * 8 * sizeof(spinor));
+	//su3 *uodd1_halos   = malloc(VOLUMEH1 * 4 * sizeof(spinor));
+	//su3 *ueven1_halos  = malloc(VOLUMEH1 * 4 * sizeof(spinor));
 
 	printf("Done!\n");
 
-	/*printf("Creating random spinor and gauge inputs ... \n");
+	/*printf("Creating random spinor and gauge inputs ...");
 
 	for (int i=0 ; i<VOLUME/2 ; i++ ) {
 		create_random_spinor(in + i);
@@ -83,7 +87,7 @@ int main(void) {
 
 	printf("Done!\n");*/
 
-	printf("Reading spinor and gauge inputs ... \n");
+	printf("Reading spinor and gauge inputs ...");
 
 	read_spinor("tmp_spinor.txt", tmp);
 	read_spinor("in_spinor.txt", in);
@@ -92,54 +96,153 @@ int main(void) {
 	read_gauge("in_gauge1.txt", u1);
 
 	printf("Done!\n");
-	printf("Data reordering and adding necessary halos ... \n");
+	printf("Data reordering and adding necessary halos ...");
 
-	devide_gauge_to_oddeven(u0, ueven0, uodd0, 0);
-	devide_gauge_to_oddeven(u1, ueven1, uodd1, 1);
+	//devide_gauge_to_oddeven(u0, ueven0, uodd0, 0);
+	//devide_gauge_to_oddeven(u1, ueven1, uodd1, 1);
+	reorganize_gauge(u0, u0_re, 0);
+	reorganize_gauge(u1, u1_re, 1);
 
-	add_1d_halos_spinor(in_halos,   in,    2);
-	add_1d_halos_gauge(uodd1_halos,  uodd1,  2);
-	add_1d_halos_gauge(ueven1_halos, ueven1, 2);
+	add_1d_halos_spinor(in_halos,   in,    1);
+	add_1d_halos_gauge(u1_halos,  u1_re,  1);
+	//add_1d_halos_gauge(ueven1_halos, ueven1, 2);
 
-	add_1d_halos_gauge(uodd0_halos,  uodd0,  1);
-	add_1d_halos_gauge(ueven0_halos, ueven0, 1);
+	add_1d_halos_gauge(u0_halos,  u0_re,  1);
+	//add_1d_halos_gauge(ueven0_halos, ueven0, 1);
 
 	printf("Done!\n");
-	printf("Setting up DFE SLIC  ... \n");
+	printf("Transferring Gauge to Memory  ...");
 
 	max_file_t *maxfile = S_LQCD_init();
 	max_engine_t *engine = max_load(maxfile, "*");
+	int burstSize = max_get_burst_size(maxfile, 0);
+	int burstsPerGaugeT  = (LX*LY*LZ/2*8*sizeof(su3)) / burstSize;
+	int burstsPerSpinorT = (LX*LY*LZ/2*sizeof(spinor)) / burstSize;
 
-	max_actions_t* act = max_actions_init(maxfile, "default");
+	int address_g0 = 0;
+	int address_g1 = T * burstsPerGaugeT;
+	int address_p  = 2 * T * burstsPerGaugeT;
+	int address_mp = 2 * T * burstsPerGaugeT + T * burstsPerSpinorT;
 
-	max_set_double(act, "times1kernel", "beta_s", -.5);
-	max_set_double(act, "times1kernel", "beta_t_b", 0.3);
-	max_set_double(act, "times1kernel", "beta_t_f", 0.3);
+	/*************** writing gauge0 to LMEM **************/
+	max_actions_t* act = max_actions_init(maxfile, 0);
+	max_queue_input(act, "gauge_in", u0_re, VOLUME/2 * 8 * sizeof(su3));
+	max_set_ticks(act, "gWriteCmdKernel", T*burstsPerGaugeT);
+	max_set_uint64t(act, "gWriteCmdKernel", "startAddress", address_g0);
+	max_ignore_kernel(act, "diracKernel");
+	//max_ignore_kernel(act2, "sub1kernel");
+	max_ignore_kernel(act, "gReadCmdKernel");
+	max_ignore_kernel(act, "spWriteCmdKernel");
+	max_ignore_kernel(act, "spReadCmdKernel0");
+    max_lmem_set_interrupt_on(act, "gtoLmem");
+    max_ignore_route(act, "sptoLmemMux");
+    max_ignore_route(act, "spfromLmem0Demux");
+	max_run(engine, act);
+	max_actions_free(act);
 
-	max_set_double(act, "sub1kernel", "alpha", 4.1);
+	/*************** writing gauge1 to LMEM **************/
+	act = max_actions_init(maxfile, 0);
+	max_queue_input(act, "gauge_in", u1_re, VOLUME/2 * 8 * sizeof(su3));
+	max_set_ticks(act, "gWriteCmdKernel", T*burstsPerGaugeT);
+	max_set_uint64t(act, "gWriteCmdKernel", "startAddress", address_g1);
+	max_ignore_kernel(act, "diracKernel");
+	//max_ignore_kernel(act2, "sub1kernel");
+	max_ignore_kernel(act, "gReadCmdKernel");
+	max_ignore_kernel(act, "spWriteCmdKernel");
+	max_ignore_kernel(act, "spReadCmdKernel0");
+    max_lmem_set_interrupt_on(act, "gtoLmem");
+    max_ignore_route(act, "sptoLmemMux");
+    max_ignore_route(act, "spfromLmem0Demux");
+	max_run(engine, act);
+	max_actions_free(act);
+
+	printf("Done!\n");
+	printf("Transferring Input Spinors to Memory  ...");
+
+	/*************** writing input spinors to LMEM **************/
+	act = max_actions_init(maxfile, 0);
+	max_queue_input(act, "spinor_in", in, VOLUME/2 * sizeof(spinor));
+	max_set_ticks(act, "spWriteCmdKernel", T*burstsPerSpinorT);
+	max_set_uint64t(act, "spWriteCmdKernel", "startAddress", address_p);
+	max_set_uint64t(act, "spWriteCmdKernel", "halos", 0);
+	max_ignore_kernel(act, "diracKernel");
+	//max_ignore_kernel(act2, "sub1kernel");
+	max_ignore_kernel(act, "gReadCmdKernel");
+	max_ignore_kernel(act, "gWriteCmdKernel");
+	max_ignore_kernel(act, "spReadCmdKernel0");
+    max_lmem_set_interrupt_on(act, "sptoLmem");
+    max_route(act, "sptoLmemMux_fromCPU", "sptoLmemMux");
+    max_ignore_route(act, "spfromLmem0Demux");
+	max_run(engine, act);
+	max_actions_free(act);
+
+	printf("Done!\n");
+
+	/*max_set_double(act, "sub1kernel", "alpha", 4.1);
 	max_set_double(act, "sub1kernel", "beta_s", -.5 / 16.4);
 	max_set_double(act, "sub1kernel", "beta_t_b", 0.3 / 16.4);
-	max_set_double(act, "sub1kernel", "beta_t_f", 0.3 / 16.4);
+	max_set_double(act, "sub1kernel", "beta_t_f", 0.3 / 16.4);*/
 
-	max_queue_input(act, "times1kernel_spinor_in", in_halos, VOLUMEH1 * sizeof(spinor));
-	max_queue_input(act, "times1kernel_gauge0", uodd1_halos, VOLUMEH1 * 4 * sizeof(su3));
-	max_queue_input(act, "times1kernel_gauge1", ueven1_halos, VOLUMEH1 * 4 * sizeof(su3));
+	/*************** Calculate MP LMEM **************/
+	printf("Running LQCD on DFE ...");
+	act = max_actions_init(maxfile, 0);
 
-	max_queue_input(act, "sub1kernel_gauge0", uodd0_halos, VOLUMEH2 * 4 * sizeof(su3));
-	max_queue_input(act, "sub1kernel_gauge1", ueven0_halos, VOLUMEH2 * 4 * sizeof(su3));
+	max_set_double(act, "diracKernel", "beta_s", -.5);
+	max_set_double(act, "diracKernel", "beta_t_b", 0.3);
+	max_set_double(act, "diracKernel", "beta_t_f", 0.3);
 
-	max_queue_output(act, "sub1kernel_spinor_out", out_dfe,  VOLUME/2 * sizeof(spinor));
+	max_set_ticks(act, "diracKernel", 16/NUM_PIPES * ( (T+2)*LX*LY*LZ/2 +  LOOP_OFFSET) + 2 );
 
-	printf("Done!\n");
-	printf("Running LQCD on DFE ...\n");
+	max_set_ticks(act, "gReadCmdKernel", (T+2)*burstsPerGaugeT);
+	max_set_uint64t(act, "gReadCmdKernel", "startAddress", address_g1);
+
+	max_set_ticks(act, "spReadCmdKernel0", (T+2)*burstsPerSpinorT);
+	max_set_uint64t(act, "spReadCmdKernel0", "startAddress", address_p);
+	max_set_uint64t(act, "spReadCmdKernel0", "halos", 1);
+
+	max_set_ticks(act, "spWriteCmdKernel", T*burstsPerSpinorT);
+	max_set_uint64t(act, "spWriteCmdKernel", "startAddress", address_mp);
+	max_set_uint64t(act, "spWriteCmdKernel", "halos", 0);
+
+    max_route(act, "sptoLmemMux_fromKernel", "sptoLmemMux");
+    max_route(act, "spfromLmem0Demux", "spfromLmem0Demux_toKernel");
+
+	max_ignore_kernel(act, "gWriteCmdKernel");
+
+    max_lmem_set_interrupt_on(act, "sptoLmem");
+
 
 	max_run(engine, act);
-	max_unload(engine);
+	max_actions_free(act);
 
 	printf("Done!\n");
+
+
+	printf("Transferring Input Spinors to Memory  ...");
+
+	/*************** Reading output spinors from LMEM **************/
+	act = max_actions_init(maxfile, 0);
+	max_queue_output(act, "spinor_out", out_dfe,  VOLUME/2 * sizeof(spinor));
+	max_set_ticks(act, "spReadCmdKernel0", T*burstsPerSpinorT);
+	max_set_uint64t(act, "spReadCmdKernel0", "startAddress", address_mp);
+	max_set_uint64t(act, "spReadCmdKernel0", "halos", 0);
+	max_ignore_kernel(act, "diracKernel");
+	max_ignore_kernel(act, "gReadCmdKernel");
+	max_ignore_kernel(act, "gWriteCmdKernel");
+	max_ignore_kernel(act, "spWriteCmdKernel");
+	max_ignore_route(act, "sptoLmemMux");
+	max_route(act, "spfromLmem0Demux", "spfromLmem0Demux_toCPU");
+	max_run(engine, act);
+	max_actions_free(act);
+
+	printf("Done!\n");
+
+
+	max_unload(engine);
+
 	printf("Verifying LQCD output ...\n");
 
-	return  verify_results(out_dfe, out_expected, VOLUME/2);
+	return  verify_results(out_dfe, tmp, VOLUME/2);
 }
 
 int verify_results (spinor* dfe_out, spinor *expected_out, int V) {
@@ -232,9 +335,9 @@ void add_1d_halos_gauge(su3* with_halos, su3* orig, int halos) {
 				for (int x = 0 ; x < LX/2 ; x++ ) {
 					int tt = (t+T)%T;
 
-					for (int i=0 ; i < 4 ; i++ ){
-						with_halos[ (((( (t+halos) * LZ + z) * LY + y) * LX/2 ) + x) * 4 + i] =
-								orig[ ((((tt*LZ + z) * LY + y) * LX/2 ) + x) * 4 + i];
+					for (int i=0 ; i < 8 ; i++ ){
+						with_halos[ (((( (t+halos) * LZ + z) * LY + y) * LX/2 ) + x) * 8 + i] =
+								orig[ ((((tt*LZ + z) * LY + y) * LX/2 ) + x) * 8 + i];
 					}
 				}
 			}
@@ -538,6 +641,62 @@ void devide_gauge_to_oddeven(su3 const * const in, su3 * const even, su3 * const
 	}
 }
 
+void reorganize_gauge(su3 const * const in, su3 * const out, int ieo) {
+	int i = 0;
+	for (int t=0 ; t<T ; t++ ) {
+		for (int z=0 ; z<LZ ; z++ ) {
+			for (int y=0 ; y<LY ; y++ ) {
+				for (int x=0 ; x<LX/2 ; x++ ) {
+					for (int mu=0; mu<4 ; mu++ ) {
+						for (int f=-1; f<=1 ; f+= 2) {
+							su3 tmp = in[i];
+
+							int isOddRow = (t & 1) ^ (z & 1) ^ (y & 1) ^ ieo;
+
+							/*int mu_ = (mu+1)%4;
+							int t_ = t;               // converting from checkerboarded
+							int z_ = z/2;             // coordinates of qphix along x-axis
+							int y_ = y;               // to tmLQCD checkerboarding along
+							int x_ = (2*x)+isOddRow;  // along y-axis*/
+
+							if (f == 1) {
+
+								int xx = (mu==0)?( isOddRow ? x+1 :x ):x;
+								int yy = (mu==1)?y+1:y;
+								int zz = (mu==2)?z+1:z;
+								int tt = (mu==3)?t+1:t;
+
+								tt = (tt+T) % T;
+								zz = (zz+LZ) % LZ;
+								yy = (yy+LY) % LY;
+								xx = (xx+LX) % (LX/2);
+
+								out[ ((((((tt*LZ)+zz)*LY)+yy)*LX/2)+xx)*8+mu*2+1 ] = tmp;
+
+							} else {
+
+								int xx = (mu==0)?( isOddRow ? x : x-1 ):x;
+								int yy = (mu==1)?y-1:y;
+								int zz = (mu==2)?z-1:z;
+								int tt = (mu==3)?t-1:t;
+
+								tt = (tt+T) % T;
+								zz = (zz+LZ) % LZ;
+								yy = (yy+LY) % LY;
+								xx = (xx+LX) % (LX/2);
+
+								out[ ((((((tt*LZ)+zz)*LY)+yy)*LX/2)+xx)*8+mu*2+0 ] = tmp;
+
+							}
+
+							i++;
+						}
+					}
+				}
+			}
+		}
+	}
+}
 void print_spinors (spinor* s) {
 	for (int i=0 ; i < VOLUME/2 ; i++ ) {
 		printf("%f %f\n", creal(s->s0.c0), cimag(s->s0.c0));

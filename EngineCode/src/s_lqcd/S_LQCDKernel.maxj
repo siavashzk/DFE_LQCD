@@ -77,24 +77,24 @@ class S_LQCDKernel extends Kernel {
 				QCDConstants.getVectoredSpinorType(),
 				writeChainEnable & (iter===0)
 				);
-		DFEVector<DFEComplex> gauge0_in =
+		DFEVector<DFEComplex> gauge_in =
 			io.input(
-					parameters.getName()+"_gauge0",
+					parameters.getName()+"_gauge",
 					QCDConstants.getVectoredSu3Type(),
-					writeChainEnable & ((iter&1)===0) );
-		DFEVector<DFEComplex> gauge1_in =
+					writeChainEnable );
+		/*DFEVector<DFEComplex> gauge1_in =
 			io.input(
 					parameters.getName()+"_gauge1",
 					QCDConstants.getVectoredSu3Type(),
-					writeChainEnable & ((iter&1)===1));
+					writeChainEnable & ((iter&1)===1));*/
 
 		DFEVar beta_s   = io.scalarInput("beta_s",   QCDConstants.realType );
 		DFEVar beta_t_f = io.scalarInput("beta_t_f", QCDConstants.realType );
 		DFEVar beta_t_b = io.scalarInput("beta_t_b", QCDConstants.realType );
 
 		DFESpinor k = new DFESpinor(constants, spinor_in);
-		DFESu3 gauge0 = new DFESu3(constants, gauge0_in);
-		DFESu3 gauge1 = new DFESu3(constants, gauge1_in);
+		DFESu3 gauge = new DFESu3(constants, gauge_in);
+		//DFESu3 gauge1 = new DFESu3(constants, gauge1_in);
 
 		DFESu3Vector a, b;
 		DFESu3Vector psi;
@@ -131,7 +131,7 @@ class S_LQCDKernel extends Kernel {
 			b = bNegSelector   ? -b         : b ;
 			b = bMultISelector ? b.mult_i() : b ;
 			psi = a + b;
-			g = gTransSelector ? gauge1.transpose() : gauge0.conjugate() ;
+			g = gTransSelector ? gauge.transpose() : gauge.conjugate() ;
 			psi = g * psi;
 			coeff = (mu < 6) ? beta_s : ( (mu===6) ? beta_t_b : beta_t_f );
 			psi = psi * coeff;

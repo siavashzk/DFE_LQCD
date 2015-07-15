@@ -9,8 +9,9 @@ extern "C" {
 #define S_LQCD_LZ (4)
 #define S_LQCD_LY (10)
 #define S_LQCD_LX (6)
-#define S_LQCD_loopOffset (15)
 #define S_LQCD_T (10)
+#define S_LQCD_loopOffset (15)
+#define S_LQCD_numPipes (2)
 #define S_LQCD_PCIE_ALIGNMENT (16)
 
 
@@ -24,46 +25,50 @@ extern "C" {
 /**
  * \brief Basic static function for the interface 'default'.
  * 
- * \param [in] inscalar_sub1kernel_alpha Input scalar parameter "sub1kernel.alpha".
- * \param [in] inscalar_sub1kernel_beta_s Input scalar parameter "sub1kernel.beta_s".
- * \param [in] inscalar_sub1kernel_beta_t_b Input scalar parameter "sub1kernel.beta_t_b".
- * \param [in] inscalar_sub1kernel_beta_t_f Input scalar parameter "sub1kernel.beta_t_f".
- * \param [in] inscalar_times1kernel_beta_s Input scalar parameter "times1kernel.beta_s".
- * \param [in] inscalar_times1kernel_beta_t_b Input scalar parameter "times1kernel.beta_t_b".
- * \param [in] inscalar_times1kernel_beta_t_f Input scalar parameter "times1kernel.beta_t_f".
- * \param [in] instream_sub1kernel_gauge0 Stream "sub1kernel_gauge0".
- * \param [in] instream_size_sub1kernel_gauge0 The size of the stream instream_sub1kernel_gauge0 in bytes.
- * \param [in] instream_sub1kernel_gauge1 Stream "sub1kernel_gauge1".
- * \param [in] instream_size_sub1kernel_gauge1 The size of the stream instream_sub1kernel_gauge1 in bytes.
- * \param [in] instream_times1kernel_gauge0 Stream "times1kernel_gauge0".
- * \param [in] instream_size_times1kernel_gauge0 The size of the stream instream_times1kernel_gauge0 in bytes.
- * \param [in] instream_times1kernel_gauge1 Stream "times1kernel_gauge1".
- * \param [in] instream_size_times1kernel_gauge1 The size of the stream instream_times1kernel_gauge1 in bytes.
- * \param [in] instream_times1kernel_spinor_in Stream "times1kernel_spinor_in".
- * \param [in] instream_size_times1kernel_spinor_in The size of the stream instream_times1kernel_spinor_in in bytes.
- * \param [out] outstream_sub1kernel_spinor_out Stream "sub1kernel_spinor_out".
- * \param [in] outstream_size_sub1kernel_spinor_out The size of the stream outstream_sub1kernel_spinor_out in bytes.
+ * \param [in] ticks_diracKernel The number of ticks for which kernel "diracKernel" will run.
+ * \param [in] ticks_gReadCmdKernel The number of ticks for which kernel "gReadCmdKernel" will run.
+ * \param [in] ticks_gWriteCmdKernel The number of ticks for which kernel "gWriteCmdKernel" will run.
+ * \param [in] ticks_spReadCmdKernel0 The number of ticks for which kernel "spReadCmdKernel0" will run.
+ * \param [in] ticks_spWriteCmdKernel The number of ticks for which kernel "spWriteCmdKernel" will run.
+ * \param [in] inscalar_diracKernel_beta_s Input scalar parameter "diracKernel.beta_s".
+ * \param [in] inscalar_diracKernel_beta_t_b Input scalar parameter "diracKernel.beta_t_b".
+ * \param [in] inscalar_diracKernel_beta_t_f Input scalar parameter "diracKernel.beta_t_f".
+ * \param [in] inscalar_gReadCmdKernel_startAddress Input scalar parameter "gReadCmdKernel.startAddress".
+ * \param [in] inscalar_gWriteCmdKernel_startAddress Input scalar parameter "gWriteCmdKernel.startAddress".
+ * \param [in] inscalar_spReadCmdKernel0_halos Input scalar parameter "spReadCmdKernel0.halos".
+ * \param [in] inscalar_spReadCmdKernel0_startAddress Input scalar parameter "spReadCmdKernel0.startAddress".
+ * \param [in] inscalar_spWriteCmdKernel_halos Input scalar parameter "spWriteCmdKernel.halos".
+ * \param [in] inscalar_spWriteCmdKernel_startAddress Input scalar parameter "spWriteCmdKernel.startAddress".
+ * \param [in] instream_gauge_in Stream "gauge_in".
+ * \param [in] instream_size_gauge_in The size of the stream instream_gauge_in in bytes.
+ * \param [in] instream_spinor_in Stream "spinor_in".
+ * \param [in] instream_size_spinor_in The size of the stream instream_spinor_in in bytes.
+ * \param [out] outstream_spinor_out Stream "spinor_out".
+ * \param [in] outstream_size_spinor_out The size of the stream outstream_spinor_out in bytes.
+ * \param [in] routing_string A string containing comma-separated "from_name -> to_name" routing commands.
  */
 void S_LQCD(
-	double inscalar_sub1kernel_alpha,
-	double inscalar_sub1kernel_beta_s,
-	double inscalar_sub1kernel_beta_t_b,
-	double inscalar_sub1kernel_beta_t_f,
-	double inscalar_times1kernel_beta_s,
-	double inscalar_times1kernel_beta_t_b,
-	double inscalar_times1kernel_beta_t_f,
-	const void *instream_sub1kernel_gauge0,
-	size_t instream_size_sub1kernel_gauge0,
-	const void *instream_sub1kernel_gauge1,
-	size_t instream_size_sub1kernel_gauge1,
-	const void *instream_times1kernel_gauge0,
-	size_t instream_size_times1kernel_gauge0,
-	const void *instream_times1kernel_gauge1,
-	size_t instream_size_times1kernel_gauge1,
-	const void *instream_times1kernel_spinor_in,
-	size_t instream_size_times1kernel_spinor_in,
-	void *outstream_sub1kernel_spinor_out,
-	size_t outstream_size_sub1kernel_spinor_out);
+	uint64_t ticks_diracKernel,
+	uint64_t ticks_gReadCmdKernel,
+	uint64_t ticks_gWriteCmdKernel,
+	uint64_t ticks_spReadCmdKernel0,
+	uint64_t ticks_spWriteCmdKernel,
+	double inscalar_diracKernel_beta_s,
+	double inscalar_diracKernel_beta_t_b,
+	double inscalar_diracKernel_beta_t_f,
+	uint64_t inscalar_gReadCmdKernel_startAddress,
+	uint64_t inscalar_gWriteCmdKernel_startAddress,
+	uint64_t inscalar_spReadCmdKernel0_halos,
+	uint64_t inscalar_spReadCmdKernel0_startAddress,
+	uint64_t inscalar_spWriteCmdKernel_halos,
+	uint64_t inscalar_spWriteCmdKernel_startAddress,
+	const void *instream_gauge_in,
+	size_t instream_size_gauge_in,
+	const void *instream_spinor_in,
+	size_t instream_size_spinor_in,
+	void *outstream_spinor_out,
+	size_t outstream_size_spinor_out,
+	const char * routing_string);
 
 /**
  * \brief Basic static non-blocking function for the interface 'default'.
@@ -73,72 +78,78 @@ void S_LQCD(
  * note that one of these *must* be called, so that associated memory can be released.
  * 
  * 
- * \param [in] inscalar_sub1kernel_alpha Input scalar parameter "sub1kernel.alpha".
- * \param [in] inscalar_sub1kernel_beta_s Input scalar parameter "sub1kernel.beta_s".
- * \param [in] inscalar_sub1kernel_beta_t_b Input scalar parameter "sub1kernel.beta_t_b".
- * \param [in] inscalar_sub1kernel_beta_t_f Input scalar parameter "sub1kernel.beta_t_f".
- * \param [in] inscalar_times1kernel_beta_s Input scalar parameter "times1kernel.beta_s".
- * \param [in] inscalar_times1kernel_beta_t_b Input scalar parameter "times1kernel.beta_t_b".
- * \param [in] inscalar_times1kernel_beta_t_f Input scalar parameter "times1kernel.beta_t_f".
- * \param [in] instream_sub1kernel_gauge0 Stream "sub1kernel_gauge0".
- * \param [in] instream_size_sub1kernel_gauge0 The size of the stream instream_sub1kernel_gauge0 in bytes.
- * \param [in] instream_sub1kernel_gauge1 Stream "sub1kernel_gauge1".
- * \param [in] instream_size_sub1kernel_gauge1 The size of the stream instream_sub1kernel_gauge1 in bytes.
- * \param [in] instream_times1kernel_gauge0 Stream "times1kernel_gauge0".
- * \param [in] instream_size_times1kernel_gauge0 The size of the stream instream_times1kernel_gauge0 in bytes.
- * \param [in] instream_times1kernel_gauge1 Stream "times1kernel_gauge1".
- * \param [in] instream_size_times1kernel_gauge1 The size of the stream instream_times1kernel_gauge1 in bytes.
- * \param [in] instream_times1kernel_spinor_in Stream "times1kernel_spinor_in".
- * \param [in] instream_size_times1kernel_spinor_in The size of the stream instream_times1kernel_spinor_in in bytes.
- * \param [out] outstream_sub1kernel_spinor_out Stream "sub1kernel_spinor_out".
- * \param [in] outstream_size_sub1kernel_spinor_out The size of the stream outstream_sub1kernel_spinor_out in bytes.
+ * \param [in] ticks_diracKernel The number of ticks for which kernel "diracKernel" will run.
+ * \param [in] ticks_gReadCmdKernel The number of ticks for which kernel "gReadCmdKernel" will run.
+ * \param [in] ticks_gWriteCmdKernel The number of ticks for which kernel "gWriteCmdKernel" will run.
+ * \param [in] ticks_spReadCmdKernel0 The number of ticks for which kernel "spReadCmdKernel0" will run.
+ * \param [in] ticks_spWriteCmdKernel The number of ticks for which kernel "spWriteCmdKernel" will run.
+ * \param [in] inscalar_diracKernel_beta_s Input scalar parameter "diracKernel.beta_s".
+ * \param [in] inscalar_diracKernel_beta_t_b Input scalar parameter "diracKernel.beta_t_b".
+ * \param [in] inscalar_diracKernel_beta_t_f Input scalar parameter "diracKernel.beta_t_f".
+ * \param [in] inscalar_gReadCmdKernel_startAddress Input scalar parameter "gReadCmdKernel.startAddress".
+ * \param [in] inscalar_gWriteCmdKernel_startAddress Input scalar parameter "gWriteCmdKernel.startAddress".
+ * \param [in] inscalar_spReadCmdKernel0_halos Input scalar parameter "spReadCmdKernel0.halos".
+ * \param [in] inscalar_spReadCmdKernel0_startAddress Input scalar parameter "spReadCmdKernel0.startAddress".
+ * \param [in] inscalar_spWriteCmdKernel_halos Input scalar parameter "spWriteCmdKernel.halos".
+ * \param [in] inscalar_spWriteCmdKernel_startAddress Input scalar parameter "spWriteCmdKernel.startAddress".
+ * \param [in] instream_gauge_in Stream "gauge_in".
+ * \param [in] instream_size_gauge_in The size of the stream instream_gauge_in in bytes.
+ * \param [in] instream_spinor_in Stream "spinor_in".
+ * \param [in] instream_size_spinor_in The size of the stream instream_spinor_in in bytes.
+ * \param [out] outstream_spinor_out Stream "spinor_out".
+ * \param [in] outstream_size_spinor_out The size of the stream outstream_spinor_out in bytes.
+ * \param [in] routing_string A string containing comma-separated "from_name -> to_name" routing commands.
  * \return A handle on the execution status, or NULL in case of error.
  */
 max_run_t *S_LQCD_nonblock(
-	double inscalar_sub1kernel_alpha,
-	double inscalar_sub1kernel_beta_s,
-	double inscalar_sub1kernel_beta_t_b,
-	double inscalar_sub1kernel_beta_t_f,
-	double inscalar_times1kernel_beta_s,
-	double inscalar_times1kernel_beta_t_b,
-	double inscalar_times1kernel_beta_t_f,
-	const void *instream_sub1kernel_gauge0,
-	size_t instream_size_sub1kernel_gauge0,
-	const void *instream_sub1kernel_gauge1,
-	size_t instream_size_sub1kernel_gauge1,
-	const void *instream_times1kernel_gauge0,
-	size_t instream_size_times1kernel_gauge0,
-	const void *instream_times1kernel_gauge1,
-	size_t instream_size_times1kernel_gauge1,
-	const void *instream_times1kernel_spinor_in,
-	size_t instream_size_times1kernel_spinor_in,
-	void *outstream_sub1kernel_spinor_out,
-	size_t outstream_size_sub1kernel_spinor_out);
+	uint64_t ticks_diracKernel,
+	uint64_t ticks_gReadCmdKernel,
+	uint64_t ticks_gWriteCmdKernel,
+	uint64_t ticks_spReadCmdKernel0,
+	uint64_t ticks_spWriteCmdKernel,
+	double inscalar_diracKernel_beta_s,
+	double inscalar_diracKernel_beta_t_b,
+	double inscalar_diracKernel_beta_t_f,
+	uint64_t inscalar_gReadCmdKernel_startAddress,
+	uint64_t inscalar_gWriteCmdKernel_startAddress,
+	uint64_t inscalar_spReadCmdKernel0_halos,
+	uint64_t inscalar_spReadCmdKernel0_startAddress,
+	uint64_t inscalar_spWriteCmdKernel_halos,
+	uint64_t inscalar_spWriteCmdKernel_startAddress,
+	const void *instream_gauge_in,
+	size_t instream_size_gauge_in,
+	const void *instream_spinor_in,
+	size_t instream_size_spinor_in,
+	void *outstream_spinor_out,
+	size_t outstream_size_spinor_out,
+	const char * routing_string);
 
 /**
  * \brief Advanced static interface, structure for the engine interface 'default'
  * 
  */
 typedef struct { 
-	double inscalar_sub1kernel_alpha; /**<  [in] Input scalar parameter "sub1kernel.alpha". */
-	double inscalar_sub1kernel_beta_s; /**<  [in] Input scalar parameter "sub1kernel.beta_s". */
-	double inscalar_sub1kernel_beta_t_b; /**<  [in] Input scalar parameter "sub1kernel.beta_t_b". */
-	double inscalar_sub1kernel_beta_t_f; /**<  [in] Input scalar parameter "sub1kernel.beta_t_f". */
-	double inscalar_times1kernel_beta_s; /**<  [in] Input scalar parameter "times1kernel.beta_s". */
-	double inscalar_times1kernel_beta_t_b; /**<  [in] Input scalar parameter "times1kernel.beta_t_b". */
-	double inscalar_times1kernel_beta_t_f; /**<  [in] Input scalar parameter "times1kernel.beta_t_f". */
-	const void *instream_sub1kernel_gauge0; /**<  [in] Stream "sub1kernel_gauge0". */
-	size_t instream_size_sub1kernel_gauge0; /**<  [in] The size of the stream instream_sub1kernel_gauge0 in bytes. */
-	const void *instream_sub1kernel_gauge1; /**<  [in] Stream "sub1kernel_gauge1". */
-	size_t instream_size_sub1kernel_gauge1; /**<  [in] The size of the stream instream_sub1kernel_gauge1 in bytes. */
-	const void *instream_times1kernel_gauge0; /**<  [in] Stream "times1kernel_gauge0". */
-	size_t instream_size_times1kernel_gauge0; /**<  [in] The size of the stream instream_times1kernel_gauge0 in bytes. */
-	const void *instream_times1kernel_gauge1; /**<  [in] Stream "times1kernel_gauge1". */
-	size_t instream_size_times1kernel_gauge1; /**<  [in] The size of the stream instream_times1kernel_gauge1 in bytes. */
-	const void *instream_times1kernel_spinor_in; /**<  [in] Stream "times1kernel_spinor_in". */
-	size_t instream_size_times1kernel_spinor_in; /**<  [in] The size of the stream instream_times1kernel_spinor_in in bytes. */
-	void *outstream_sub1kernel_spinor_out; /**<  [out] Stream "sub1kernel_spinor_out". */
-	size_t outstream_size_sub1kernel_spinor_out; /**<  [in] The size of the stream outstream_sub1kernel_spinor_out in bytes. */
+	uint64_t ticks_diracKernel; /**<  [in] The number of ticks for which kernel "diracKernel" will run. */
+	uint64_t ticks_gReadCmdKernel; /**<  [in] The number of ticks for which kernel "gReadCmdKernel" will run. */
+	uint64_t ticks_gWriteCmdKernel; /**<  [in] The number of ticks for which kernel "gWriteCmdKernel" will run. */
+	uint64_t ticks_spReadCmdKernel0; /**<  [in] The number of ticks for which kernel "spReadCmdKernel0" will run. */
+	uint64_t ticks_spWriteCmdKernel; /**<  [in] The number of ticks for which kernel "spWriteCmdKernel" will run. */
+	double inscalar_diracKernel_beta_s; /**<  [in] Input scalar parameter "diracKernel.beta_s". */
+	double inscalar_diracKernel_beta_t_b; /**<  [in] Input scalar parameter "diracKernel.beta_t_b". */
+	double inscalar_diracKernel_beta_t_f; /**<  [in] Input scalar parameter "diracKernel.beta_t_f". */
+	uint64_t inscalar_gReadCmdKernel_startAddress; /**<  [in] Input scalar parameter "gReadCmdKernel.startAddress". */
+	uint64_t inscalar_gWriteCmdKernel_startAddress; /**<  [in] Input scalar parameter "gWriteCmdKernel.startAddress". */
+	uint64_t inscalar_spReadCmdKernel0_halos; /**<  [in] Input scalar parameter "spReadCmdKernel0.halos". */
+	uint64_t inscalar_spReadCmdKernel0_startAddress; /**<  [in] Input scalar parameter "spReadCmdKernel0.startAddress". */
+	uint64_t inscalar_spWriteCmdKernel_halos; /**<  [in] Input scalar parameter "spWriteCmdKernel.halos". */
+	uint64_t inscalar_spWriteCmdKernel_startAddress; /**<  [in] Input scalar parameter "spWriteCmdKernel.startAddress". */
+	const void *instream_gauge_in; /**<  [in] Stream "gauge_in". */
+	size_t instream_size_gauge_in; /**<  [in] The size of the stream instream_gauge_in in bytes. */
+	const void *instream_spinor_in; /**<  [in] Stream "spinor_in". */
+	size_t instream_size_spinor_in; /**<  [in] The size of the stream instream_spinor_in in bytes. */
+	void *outstream_spinor_out; /**<  [out] Stream "spinor_out". */
+	size_t outstream_size_spinor_out; /**<  [in] The size of the stream outstream_spinor_out in bytes. */
+	const char * routing_string; /**<  [in] A string containing comma-separated "from_name -> to_name" routing commands. */
 } S_LQCD_actions_t;
 
 /**

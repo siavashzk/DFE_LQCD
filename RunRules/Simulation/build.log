@@ -1,60 +1,57 @@
-Mon 15:07: ########################################## 
-Mon 15:07: Compiling.
-Mon 15:07: ########################################## 
+Wed 17:24: ########################################## 
+Wed 17:24: Compiling.
+Wed 17:24: ########################################## 
 
-Mon 15:07: MaxCompiler version: 2015.1.
-Mon 15:07: Build Simulation run rule for DFE_QPHIX start time: Mon Jul 13 15:07:30 BST 2015.
-Mon 15:07: Project location: /home/skamali/workspace3/DFE_QPHIX.
-Mon 15:07: Detailed build log: /home/skamali/workspace3/DFE_QPHIX/RunRules/Simulation/build.log.
+Wed 17:24: MaxCompiler version: 2015.1.
+Wed 17:24: Build Simulation run rule for DFE_QPHIX start time: Wed Jul 15 17:24:41 BST 2015.
+Wed 17:24: Project location: /home/skamali/workspace3/DFE_QPHIX.
+Wed 17:24: Detailed build log: /home/skamali/workspace3/DFE_QPHIX/RunRules/Simulation/build.log.
 
-Mon 15:07: Compiling Engine Code.
-Mon 15:07: Engine building skipped (no changes on .max files).
-Mon 15:07: Compiling CPU Code.
-Mon 15:07: Run CPU project make files updating
-Mon 15:07: Executing command:
-Mon 15:07: java -jar /network-raid/opt/maxcompiler-2015.1/lib/MaxIDE/projectAdmin.jar -u /home/skamali/workspace3/DFE_QPHIX Simulation 
-Mon 15:07: Command output:
+Wed 17:24: Compiling Engine Code.
+Wed 17:24: Engine building skipped (no changes on .max files).
+Wed 17:24: Compiling CPU Code.
+Wed 17:24: Run CPU project make files updating
+Wed 17:24: Executing command:
+Wed 17:24: java -jar /network-raid/opt/maxcompiler-2015.1/lib/MaxIDE/projectAdmin.jar -u /home/skamali/workspace3/DFE_QPHIX Simulation 
+Wed 17:24: Command output:
 
-Mon 15:07: MaxCompiler Project Admin Tool Version 2015.1.00001
-Mon 15:07:  Copyright Maxeler Technologies 2010 - 2015. All rights reserved.
-Mon 15:07: Handler version 2
-Mon 15:07: Updating RunRule dependent Makefiles for RunRule 'Simulation'
-Mon 15:07: 	Updating: Simulation
-Mon 15:07: Found makefiles: 1
-Mon 15:07: 	Updated: Simulation
-Mon 15:07: Run CPU make.
-Mon 15:07: make RUNRULE=Simulation 
-Mon 15:07: Command output:
-Mon 15:07: make -f Makefile.rules build
-Mon 15:07: make[1]: Entering directory `/home/skamali/workspace3/DFE_QPHIX/CPUCode'
-Mon 15:07: set -e; rm -f ../RunRules/Simulation/objects/c/S_LQCDCpuCode.d ;                                                             \
-Mon 15:07: 	  cc -M -std=gnu99 -g -O3 -Wall -Wextra -I../RunRules/Simulation/include  -I '/network-raid/opt/maxcompiler-2015.1/include/slic'  -Wno-error S_LQCDCpuCode.c > ../RunRules/Simulation/objects/c/S_LQCDCpuCode.d.$$ ;                                 \
-Mon 15:07:       sed 's,\(S_LQCDCpuCode\)\.o[ :]*,../RunRules/Simulation/objects/c/\1.o ../RunRules/Simulation/objects/c/S_LQCDCpuCode.d : ,g' < ../RunRules/Simulation/objects/c/S_LQCDCpuCode.d.$$ > ../RunRules/Simulation/objects/c/S_LQCDCpuCode.d; \
-Mon 15:07:       rm -f ../RunRules/Simulation/objects/c/S_LQCDCpuCode.d.$$
-Mon 15:07: make[1]: Leaving directory `/home/skamali/workspace3/DFE_QPHIX/CPUCode'
-Mon 15:07: make[1]: Entering directory `/home/skamali/workspace3/DFE_QPHIX/CPUCode'
-Mon 15:07: cc -std=gnu99 -g -O3 -Wall -Wextra -I../RunRules/Simulation/include  -I '/network-raid/opt/maxcompiler-2015.1/include/slic'  -c S_LQCDCpuCode.c -o ../RunRules/Simulation/objects/c/S_LQCDCpuCode.o
-Mon 15:07: cc -std=gnu99 -g -O3 -Wall -Wextra -I../RunRules/Simulation/include  -I '/network-raid/opt/maxcompiler-2015.1/include/slic'  -o ../RunRules/Simulation/binaries/S_LQCD ../RunRules/Simulation/objects/maxfiles/slic_S_LQCD.o ../RunRules/Simulation/objects/c/S_LQCDCpuCode.o -g -O3  -L '/network-raid/opt/maxcompiler-2015.1/lib' -lslic -L '/network-raid/opt/maxeleros-2015.1/maxeleros/lib' -lmaxeleros -lpthread -lm -lrt 
-Mon 15:07: make[1]: Leaving directory `/home/skamali/workspace3/DFE_QPHIX/CPUCode'
-Mon 15:07: Build completed: Mon Jul 13 15:07:32 BST 2015
+Wed 17:24: MaxCompiler Project Admin Tool Version 2015.1.00001
+Wed 17:24:  Copyright Maxeler Technologies 2010 - 2015. All rights reserved.
+Wed 17:24: Handler version 2
+Wed 17:24: Updating RunRule dependent Makefiles for RunRule 'Simulation'
+Wed 17:24: 	Updating: Simulation
+Wed 17:24: Found makefiles: 1
+Wed 17:24: 	Updated: Simulation
+Wed 17:24: Run CPU make.
+Wed 17:24: make RUNRULE=Simulation 
+Wed 17:24: Command output:
+Wed 17:24: make -f Makefile.rules build
+Wed 17:24: make[1]: Entering directory `/home/skamali/workspace3/DFE_QPHIX/CPUCode'
+Wed 17:24: set -e; rm -f ../RunRules/Simulation/objects/c/S_LQCDCpuCode.d ;                                                             \
+Wed 17:24: 	  cc -M -std=gnu99 -g -O3 -Wall -Wextra -I../RunRules/Simulation/include  -I '/network-raid/opt/maxcompiler-2015.1/include/slic'  -Wno-error S_LQCDCpuCode.c > ../RunRules/Simulation/objects/c/S_LQCDCpuCode.d.$$ ;                                 \
+Wed 17:24:       sed 's,\(S_LQCDCpuCode\)\.o[ :]*,../RunRules/Simulation/objects/c/\1.o ../RunRules/Simulation/objects/c/S_LQCDCpuCode.d : ,g' < ../RunRules/Simulation/objects/c/S_LQCDCpuCode.d.$$ > ../RunRules/Simulation/objects/c/S_LQCDCpuCode.d; \
+Wed 17:24:       rm -f ../RunRules/Simulation/objects/c/S_LQCDCpuCode.d.$$
+Wed 17:24: make[1]: Leaving directory `/home/skamali/workspace3/DFE_QPHIX/CPUCode'
+Wed 17:24: make[1]: Entering directory `/home/skamali/workspace3/DFE_QPHIX/CPUCode'
+Wed 17:24: cc -std=gnu99 -g -O3 -Wall -Wextra -I../RunRules/Simulation/include  -I '/network-raid/opt/maxcompiler-2015.1/include/slic'  -c S_LQCDCpuCode.c -o ../RunRules/Simulation/objects/c/S_LQCDCpuCode.o
+Wed 17:24: cc -std=gnu99 -g -O3 -Wall -Wextra -I../RunRules/Simulation/include  -I '/network-raid/opt/maxcompiler-2015.1/include/slic'  -o ../RunRules/Simulation/binaries/S_LQCD ../RunRules/Simulation/objects/maxfiles/slic_S_LQCD.o ../RunRules/Simulation/objects/c/S_LQCDCpuCode.o -g -O3  -L '/network-raid/opt/maxcompiler-2015.1/lib' -lslic -L '/network-raid/opt/maxeleros-2015.1/maxeleros/lib' -lmaxeleros -lpthread -lm -lrt 
+Wed 17:24: make[1]: Leaving directory `/home/skamali/workspace3/DFE_QPHIX/CPUCode'
+Wed 17:24: Build completed: Wed Jul 15 17:24:42 BST 2015
 
 
-Mon 15:07: ########################################## 
-Mon 15:07: Running
-Mon 15:07: ########################################## 
-Mon 15:07: Executing command:
-Mon 15:07: '/home/skamali/workspace3/DFE_QPHIX/RunRules/Simulation/binaries/S_LQCD' 
-Mon 15:07: Command output:
-Mon 15:07: Allocating memory for data ... 
-Mon 15:07: Done!
-Mon 15:07: Reading spinor and gauge inputs ... 
-Mon 15:07: Done!
-Mon 15:07: Data reordering and adding necessary halos ... 
-Mon 15:07: Done!
-Mon 15:07: Setting up DFE SLIC  ... 
-Mon 15:07: Done!
-Mon 15:07: Running LQCD on DFE ...
-Mon 15:07: Done!
-Mon 15:07: Verifying LQCD output ...
-Mon 15:07: Good.
-Mon 15:07: Process terminated with exit code 0.
+Wed 17:24: ########################################## 
+Wed 17:24: Running
+Wed 17:24: ########################################## 
+Wed 17:24: Executing command:
+Wed 17:24: '/home/skamali/workspace3/DFE_QPHIX/RunRules/Simulation/binaries/S_LQCD' 
+Wed 17:24: Command output:
+Wed 17:24: Allocating memory for data ...Done!
+Wed 17:24: Reading spinor and gauge inputs ...Done!
+Wed 17:24: Data reordering and adding necessary halos ...Done!
+Wed 17:24: Transferring Gauge to Memory  ...Done!
+Wed 17:24: Transferring Input Spinors to Memory  ...Done!
+Wed 17:24: Running LQCD on DFE ...Done!
+Wed 17:24: Transferring Input Spinors to Memory  ...Done!
+Wed 17:24: Verifying LQCD output ...
+Wed 17:24: Good.
+Wed 17:24: Process terminated with exit code 0.

@@ -9,5 +9,6 @@
 
 EXTERN int T, VOLUME;
 EXTERN int LX, LY, LZ;
+EXTERN int NUM_PIPES, LOOP_OFFSET;
 
 #endif
