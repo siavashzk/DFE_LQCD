@@ -45,7 +45,7 @@ public class HalfSpinorBuffer extends KernelLib {
 
 		int loopOffset = m_constants.loopOffset;
 
-		bufferDepth   = MathUtils.nextMultiple(m_vectorsPerSite*(loopOffset + 20 + 2*LX*LY*LZ/2), singleBRAMdepth);
+		bufferDepth   = MathUtils.nextMultiple(m_vectorsPerSite*(loopOffset + 20 + 3*LX*LY*LZ/2), singleBRAMdepth);
 		//bufferDepthTF = MathUtils.nextMultiple(m_vectorsPerSite*loopOffset + 1 + 2*LX*LY*LZ/2, singleBRAMdepth);
 		//bufferDepthTB = MathUtils.nextMultiple(m_vectorsPerSite*loopOffset + 1               , singleBRAMdepth);
 
@@ -59,13 +59,13 @@ public class HalfSpinorBuffer extends KernelLib {
 		write_z    = dfeUInt(MathUtils.bitsToAddress(LZ))  .newInstance(owner);
 		write_y    = dfeUInt(MathUtils.bitsToAddress(LY))  .newInstance(owner);
 		write_x    = dfeUInt(MathUtils.bitsToAddress(LX/2)).newInstance(owner);
-		write_iter = dfeUInt(MathUtils.bitsToAddress(m_vectorsPerSite)).newInstance(owner);
+		write_iter = dfeUInt(max(MathUtils.bitsToAddress(m_vectorsPerSite),1)).newInstance(owner);
 
 		read_t    = dfeUInt(MathUtils.bitsToAddress(T+2*m_constants.halos)) .newInstance(owner);
 		read_z    = dfeUInt(MathUtils.bitsToAddress(LZ))  .newInstance(owner);
 		read_y    = dfeUInt(MathUtils.bitsToAddress(LY))  .newInstance(owner);
 		read_x    = dfeUInt(MathUtils.bitsToAddress(LX/2)).newInstance(owner);
-		read_iter = dfeUInt(MathUtils.bitsToAddress(m_vectorsPerSite)).newInstance(owner);
+		read_iter = dfeUInt(max(MathUtils.bitsToAddress(m_vectorsPerSite),1)).newInstance(owner);
 
 		m_bufferIn = new DFESu3Vector[m_numPipes];
 		m_bufferOut = new DFESu3Vector[m_numPipes];
@@ -131,6 +131,11 @@ public class HalfSpinorBuffer extends KernelLib {
 		}
 	}
 
+	private int max (int a, int b) {
+		if (a>= b) return a;
+		else       return b;
+	}
+
 	private DFESu3Vector[] createBuffer(
 			DFESu3Vector[] halfSpinor_in,
             DFEVar writeAddress,
@@ -187,16 +192,15 @@ public class HalfSpinorBuffer extends KernelLib {
 			(t&1).cast(dfeBool()) ^
 			(z&1).cast(dfeBool()) ^
 			(y&1).cast(dfeBool()) ^
-			(m_constants.halos&1);
-		if (m_constants.ieo == S_LQCDKernel.EO.EVENODD) isOddRow ^= 1;
+			(m_constants.halos&1) ^ m_constants.ieo;
 
 		DFEVar xn = mod(x + LX - 1 + isOddRow, LX/2)
 		            .cast(dfeUInt(MathUtils.bitsToAddress(LX/2)));
 		DFEVar xp = mod(x + LX + 0 + isOddRow, LX/2)
 		            .cast(dfeUInt(MathUtils.bitsToAddress(LX/2)));
-		DFEVar yn = mod(y - 1, LY).cast(dfeUInt(MathUtils.bitsToAddress(LY)));
+		DFEVar yn = mod(y + LY - 1, LY).cast(dfeUInt(MathUtils.bitsToAddress(LY)));
 		DFEVar yp = mod(y + 1, LY).cast(dfeUInt(MathUtils.bitsToAddress(LY)));
-		DFEVar zn = mod(z - 1, LZ).cast(dfeUInt(MathUtils.bitsToAddress(LZ)));
+		DFEVar zn = mod(z + LZ - 1, LZ).cast(dfeUInt(MathUtils.bitsToAddress(LZ)));
 		DFEVar zp = mod(z + 1, LZ).cast(dfeUInt(MathUtils.bitsToAddress(LZ)));
 		DFEVar tn = (t - 1).cast(dfeUInt(MathUtils.bitsToAddress(T+2*m_constants.halos)));
 		DFEVar tp = (t + 1).cast(dfeUInt(MathUtils.bitsToAddress(T+2*m_constants.halos)));
@@ -213,21 +217,22 @@ public class HalfSpinorBuffer extends KernelLib {
 			DFEVar mu = (iter * numPipes_ + pipe_) >> 1;
 			optimization.popEnableBitGrowth();
 
-			x = (mu === 0) ? xn : x;
-			x = (mu === 1) ? xp : x;
-			y = (mu === 2) ? yn : y;
-			y = (mu === 3) ? yp : y;
-			z = (mu === 4) ? zn : z;
-			z = (mu === 5) ? zp : z;
-			t = (mu === 6) ? tn : t;
-			t = (mu === 7) ? tp : t;
+			DFEVar xx, yy, zz, tt;
+			xx = (mu === 0) ? xn : x;
+			xx = (mu === 1) ? xp : xx;
+			yy = (mu === 2) ? yn : y;
+			yy = (mu === 3) ? yp : yy;
+			zz = (mu === 4) ? zn : z;
+			zz = (mu === 5) ? zp : zz;
+			tt = (mu === 6) ? tn : t;
+			tt = (mu === 7) ? tp : tt;
 
 			/*mu.simWatch("mu"+pipe);
-			t.simWatch("t_"+pipe);
-			z.simWatch("z_"+pipe);
-			y.simWatch("y_"+pipe);
-			x.simWatch("x_"+pipe);*/
-			addresses[pipe] = getAddress(t, z, y, x, iter);
+			tt.simWatch("t_"+pipe);
+			zz.simWatch("z_"+pipe);
+			yy.simWatch("y_"+pipe);
+			xx.simWatch("x_"+pipe);*/
+			addresses[pipe] = getAddress(tt, zz, yy, xx, iter);
 			//addresses[pipe].simWatch("address_"+pipe);
 		}
 

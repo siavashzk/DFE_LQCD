@@ -6,7 +6,6 @@ import com.maxeler.maxcompiler.v2.managers.custom.DFELink;
 import com.maxeler.maxcompiler.v2.managers.custom.blocks.Demux;
 import com.maxeler.maxcompiler.v2.managers.custom.blocks.KernelBlock;
 import com.maxeler.maxcompiler.v2.managers.custom.blocks.Mux;
-import com.maxeler.maxcompiler.v2.managers.custom.stdlib.DebugLevel;
 
 public class S_LQCDManager extends CustomManager {
 
@@ -30,8 +29,6 @@ public class S_LQCDManager extends CustomManager {
 						LZ,
 						engineParameters.getNumPipes(),
 						engineParameters.getLoopOffset(),
-						S_LQCDKernel.Mode.TIMES,
-						S_LQCDKernel.EO.EVENODD,
 						1,
 						false
 				)
@@ -99,6 +96,12 @@ public class S_LQCDManager extends CustomManager {
 				"spReadCmdOut0");
 		DFELink spfromLmem0 = addStreamFromOnCardMemory("spfromlmem0", addKernel(spReadCmdKernel0).getOutput("spReadCmdOut0"));
 
+		AddressGeneratorSpinor spReadCmdKernel1 = new AddressGeneratorSpinor(
+				makeKernelParameters("spReadCmdKernel1"),
+				T, XYZ,
+				"spReadCmdOut1");
+		DFELink spfromLmem1 = addStreamFromOnCardMemory("spfromlmem1", addKernel(spReadCmdKernel1).getOutput("spReadCmdOut1"));
+
 		/*for (String inputName: times1block.getAllInputs())
 			times1block.getInput(inputName).connect(addStreamFromCPU(inputName));*/
 
@@ -109,11 +112,14 @@ public class S_LQCDManager extends CustomManager {
 		diracKernel.getInput("diracKernel_spinor_in") <== spfromLmem0Demux.addOutput("spfromLmem0Demux_toKernel");
 		addStreamToCPU("spinor_out")                   <== spfromLmem0Demux.addOutput("spfromLmem0Demux_toCPU");
 
+		diracKernel.getInput("diracKernel_p_spinor_in") <== spfromLmem1;
+
 		Mux sptoLmemMux = mux("sptoLmemMux");
 		sptoLmemMux.addInput("sptoLmemMux_fromCPU") <== addStreamFromCPU("spinor_in");
 		sptoLmemMux.addInput("sptoLmemMux_fromKernel") <== diracKernel.getOutput("diracKernel_spinor_out");
 
 		sptoLmem <== sptoLmemMux.getOutput();
+
 
 
 		/*DFELink x1 = times1block.getOutput("diracKernel_spinor_out");
@@ -152,9 +158,9 @@ public class S_LQCDManager extends CustomManager {
 		/*for (String outputName: times1block.getAllOutputs())
 			addStreamToCPU(outputName).connect(times1block.getOutput(outputName));*/
 
-		DebugLevel MyDebugLevel = new DebugLevel();
+		/*DebugLevel MyDebugLevel = new DebugLevel();
 		MyDebugLevel.setHasStreamStatus(true);
-		debug.setDebugLevel(MyDebugLevel);
+		debug.setDebugLevel(MyDebugLevel);*/
 
 		configBuild(engineParameters );
 

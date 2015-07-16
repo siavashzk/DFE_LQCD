@@ -11,14 +11,6 @@ import com.maxeler.maxcompiler.v2.kernelcompiler.types.composite.DFEVector;
 
 class S_LQCDKernel extends Kernel {
 
-	public enum Mode {
-		TIMES, SUB
-	}
-
-	public enum EO {
-		EVENODD, ODDEVEN
-	}
-
 	protected S_LQCDKernel(
 			KernelParameters parameters,
 			int T,
@@ -27,8 +19,6 @@ class S_LQCDKernel extends Kernel {
 			int LZ,
 			int numPipes,
 			int loopOffset,
-			Mode mode,
-			EO ieo,
 			int halos,
 			boolean passGauge
 			)
@@ -37,6 +27,10 @@ class S_LQCDKernel extends Kernel {
 		super(parameters);
 
 		int ticksPerSite = 16/numPipes;
+
+		DFEVar ieo   = io.scalarInput("ieo", dfeBool() );
+		DFEVar doSub   = io.scalarInput("doSub", dfeBool() );
+		DFEVar negSign   = io.scalarInput("isign", dfeBool() );
 
 		QCDConstants constants = new QCDConstants(
 				this,
@@ -66,7 +60,7 @@ class S_LQCDKernel extends Kernel {
 		DFEVar z = writeChain.addCounter(LZ, 1);
 		DFEVar y = writeChain.addCounter(LY, 1);
 		DFEVar x = writeChain.addCounter(LX/2, 1);
-		DFEVar iter = writeChain.addCounter(16/numPipes, 1);
+		DFEVar iter = (numPipes==16) ? constant.var(dfeUInt(1),0) : writeChain.addCounter(16/numPipes, 1);
 
 		buffer.setWriteEnable(writeChainEnable);
 		buffer.setWriteCoordinates(t, z, y, x, iter);
@@ -80,21 +74,18 @@ class S_LQCDKernel extends Kernel {
 		DFEVector<DFEComplex> gauge_in =
 			io.input(
 					parameters.getName()+"_gauge",
-					QCDConstants.getVectoredSu3Type(),
+					QCDConstants.getVectoredSu3Type(numPipes),
 					writeChainEnable );
-		/*DFEVector<DFEComplex> gauge1_in =
-			io.input(
-					parameters.getName()+"_gauge1",
-					QCDConstants.getVectoredSu3Type(),
-					writeChainEnable & ((iter&1)===1));*/
 
 		DFEVar beta_s   = io.scalarInput("beta_s",   QCDConstants.realType );
 		DFEVar beta_t_f = io.scalarInput("beta_t_f", QCDConstants.realType );
 		DFEVar beta_t_b = io.scalarInput("beta_t_b", QCDConstants.realType );
 
 		DFESpinor k = new DFESpinor(constants, spinor_in);
-		DFESu3 gauge = new DFESu3(constants, gauge_in);
-		//DFESu3 gauge1 = new DFESu3(constants, gauge1_in);
+		DFESu3 gauges[] = new DFESu3[numPipes/2];
+		for (int i = 0; i < numPipes/2 ; i++ ) {
+			gauges[i] = new DFESu3(constants, gauge_in, i);
+		}
 
 		DFESu3Vector a, b;
 		DFESu3Vector psi;
@@ -122,7 +113,7 @@ class S_LQCDKernel extends Kernel {
 
 			DFEQCDSelector aS0Selector    = new DFEQCDSelector(constants, vec0 );
 			DFEQCDSelector bS2Selector    = new DFEQCDSelector(constants, vec0 & dir23 | (~vec0) & (~dir23) );
-			DFEQCDSelector bNegSelector   = new DFEQCDSelector(constants, mu17 | (vec0 & mu25) | (~vec0 & mu34) );
+			DFEQCDSelector bNegSelector   = new DFEQCDSelector(constants, ( mu17 | (vec0 & mu25) | (~vec0 & mu34) ) ^ (negSign === 1) );
 			DFEQCDSelector bMultISelector = new DFEQCDSelector(constants, dir === 0 | dir === 2 );
 			DFEQCDSelector gTransSelector = new DFEQCDSelector(constants, (mu&1) === 1);
 
@@ -131,15 +122,15 @@ class S_LQCDKernel extends Kernel {
 			b = bNegSelector   ? -b         : b ;
 			b = bMultISelector ? b.mult_i() : b ;
 			psi = a + b;
-			g = gTransSelector ? gauge.transpose() : gauge.conjugate() ;
+			g = gTransSelector ? gauges[i/2].transpose() : gauges[i/2].conjugate() ;
 			psi = g * psi;
 			coeff = (mu < 6) ? beta_s : ( (mu===6) ? beta_t_b : beta_t_f );
 			psi = psi * coeff;
 			buffer.setBufferIn(i, psi);
 
-			/*if (i==0) debug.simPrintf(
+			/*if (i%2==0) debug.simPrintf(
 					t !== 0 & t !== T+1 ,
-					"dfe pre %f %f %f %f %f %f\n",
+					"dfe_pre %f %f %f %f %f %f\n",
 					psi.c0.getReal(),
 					psi.c0.getImaginary(),
 					psi.c1.getReal(),
@@ -158,14 +149,12 @@ class S_LQCDKernel extends Kernel {
 				LX/2
 				);
 
-		//readChainEnable.simWatch("en");
-
 		CounterChain chain2 = control.count.makeCounterChain(readChainEnable);
 		DFEVar tr  = chain2.addCounter(T+2*(halos-1), 1);
 		DFEVar zr  = chain2.addCounter(LZ, 1);
 		DFEVar yxr  = (LY*LX/2 > loopOffset) ?
 					chain2.addCounter(LY*LX/2/loopOffset, 1) : constant.var(0);
-		DFEVar iterr = chain2.addCounter(16/numPipes, 1);
+		DFEVar iterr = (numPipes==16) ? constant.var(dfeUInt(1),0) : chain2.addCounter(16/numPipes, 1);
 		DFEVar yxrloop = chain2.addCounter(loopOffset, 1);
 
 
@@ -185,12 +174,20 @@ class S_LQCDKernel extends Kernel {
 		tr = tr.cast(dfeUInt(MathUtils.bitsToAddress(T+2*halos)));
 		zr = zr.cast(dfeUInt(MathUtils.bitsToAddress(LZ)));
 
+		/*readChainEnable.simWatch("enn");
+		tr.simWatch("tr");
+		zr.simWatch("zr");
+		yr.simWatch("yr");
+		xr.simWatch("xr");
+		iterr.simWatch("iterr");*/
+
 		buffer.setReadCoordinates(tr+1, zr, yr, xr, iterr);
 
 		DFESpinor addend2 = new DFESpinor(constants);
 		addend2.newZeroInstant();
 
-		System.out.println("p: "+numPipes);
+		DFEQCDSelector doSubSelect = new DFEQCDSelector (constants, doSub===1 );
+
 		if (numPipes>1) {
 
 			DFESpinor[] addends = new DFESpinor[numPipes/2];
@@ -214,8 +211,8 @@ class S_LQCDKernel extends Kernel {
 
 				DFEQCDSelector addends2S1Select = new DFEQCDSelector (constants, dir === 0 | dir === 1 );
 				DFEQCDSelector addendsMultISelect = new DFEQCDSelector (constants, dir === 0 | dir === 2 );
-				DFEQCDSelector addends2NegSelect = new DFEQCDSelector (constants, mu07 | mu34);
-				DFEQCDSelector addends3NegSelect = new DFEQCDSelector (constants, mu07 | mu25);
+				DFEQCDSelector addends2NegSelect = new DFEQCDSelector (constants, (mu07 | mu34) ^ (negSign === 1));
+				DFEQCDSelector addends3NegSelect = new DFEQCDSelector (constants, (mu07 | mu25) ^ (negSign === 1));
 
 				addends[i] = new DFESpinor(constants);
 				addends[i].s0 = phi.s0;
@@ -229,15 +226,18 @@ class S_LQCDKernel extends Kernel {
 				addends[i].s3 = addendsMultISelect ? addends[i].s3.mult_i() : addends[i].s3 ;
 				addends[i].s3 = addends3NegSelect  ? -addends[i].s3         : addends[i].s3 ;
 
+				addends[i] = doSubSelect ? -addends[i] : addends[i];
+
 				/*debug.simPrintf(
-						readChainEnable,
-						"dfe_post %f %f %f %f %f %f\n",
+						readChainEnable ,
+						"dfe_pre %f %f %f %f %f %f\n",
 						phi.s0.c0.getReal(),
 						phi.s0.c0.getImaginary(),
 						phi.s0.c1.getReal(),
 						phi.s0.c1.getImaginary(),
 						phi.s0.c2.getReal(),
 						phi.s0.c2.getImaginary());*/
+
 			}
 
 			for (int i = 0; i < numPipes/2 ; i++ ) {
@@ -248,34 +248,28 @@ class S_LQCDKernel extends Kernel {
 			}
 
 		} else {
-			//TODO support a single pipe
+			// Number of pipes is asserted in the Constants initialization. This line should never be executed
 			throw new RuntimeException("A single pipe is not currently supported");
 		}
 
-		//DFESpinor rs = new DFESpinor(constants);
 		DFESpinor addend1     = new DFESpinor(constants);
 		DFESpinor accumulator = new DFESpinor(constants);
-		DFESpinor initAddend  = null;// new DFESpinor(constants);
-		DFEVector<DFEComplex> p_spinor_in = null;
-		//DFESpinor p = null;
-		DFEVar alpha = null;
 
-		accumulator.newInstant();
-		if (mode == Mode.SUB ) {
-			alpha = io.scalarInput("alpha",   QCDConstants.realType );
-			p_spinor_in = io.input(
+		DFEVar alpha = io.scalarInput("alpha", QCDConstants.realType );
+		DFEVector<DFEComplex> p_spinor_in = io.input(
 					parameters.getName()+"_p_spinor_in",
 					QCDConstants.getVectoredSpinorType(),
-					readChainEnable & (iterr===0)
+					doSub & readChainEnable & (iterr===0)
 					);
-			initAddend = new DFESpinor(constants, p_spinor_in);
-			initAddend = initAddend * alpha;
-			addend2 = -addend2;
+		DFESpinor p = new DFESpinor(constants, p_spinor_in);
+		p = p * alpha;
 
-		} else {
-			initAddend = new DFESpinor(constants);
-			initAddend.newZeroInstant();
-		}
+		DFESpinor zeroAddend = new DFESpinor(constants);
+		zeroAddend.newZeroInstant();
+
+		DFESpinor initAddend = doSubSelect ? p : zeroAddend ;
+
+		accumulator.newInstant();
 
 		DFEQCDSelector newSum = new DFEQCDSelector (constants, iterr===0 );
 
@@ -283,46 +277,6 @@ class S_LQCDKernel extends Kernel {
 
 		accumulator <== addend1 + addend2;
 
-		/*debug.simPrintf(
-				readChainEnable,
-				"dfe_post %f %f %f %f %f %f\n",
-				addend1.s0.c0.getReal(),
-				addend1.s0.c0.getImaginary(),
-				addend1.s0.c1.getReal(),
-				addend1.s0.c1.getImaginary(),
-				addend1.s0.c2.getReal(),
-				addend1.s0.c2.getImaginary());*/
-		/*debug.simPrintf(
-				readChainEnable,
-				"dfe_post %f %f %f %f %f %f\n",
-				accumulator.s0.c0.getReal(),
-				accumulator.s0.c0.getImaginary(),
-				accumulator.s0.c1.getReal(),
-				accumulator.s0.c1.getImaginary(),
-				accumulator.s0.c2.getReal(),
-				accumulator.s0.c2.getImaginary());*/
-
-		/*rs.newInstant();
-		accumulator = rs.streamoffset(-loopOffset) + addend2;
-
-
-		rs.s0 <== newSum ? addend.s0 : accumulator.s0;
-		rs.s1 <== newSum ? addend.s1 : accumulator.s1;
-		rs.s2 <== newSum ? addend.s2 : accumulator.s2;
-		rs.s3 <== newSum ? addend.s3 : accumulator.s3;*/
-
-		//DFESpinor result = new DFESpinor(constants);
-		/*if (mode == Mode.TIMES) {
-			result.s0 = rs.s0;
-			result.s1 = rs.s1;
-			result.s2 = rs.s2;
-			result.s3 = rs.s3;
-		} else if (mode == Mode.SUB) {
-			result.s0 = p.s0 * alpha - rs.s0;
-			result.s1 = p.s1 * alpha - rs.s1;
-			result.s2 = p.s2 * alpha - rs.s2;
-			result.s3 = p.s3 * alpha - rs.s3;
-		}*/
 		DFEVector<DFEComplex> spinor_out = accumulator.convertToDFEVector();
 
 
@@ -332,24 +286,6 @@ class S_LQCDKernel extends Kernel {
 				QCDConstants.getVectoredSpinorType(),
 				readChainEnable & (iterr===(16/numPipes-1))
 				);
-
-		if (passGauge == true) {
-			/*io.output(
-					parameters.getName()+"_gauge0_out",
-					gauge0_in,
-					QCDConstants.getVectoredSu3Type());
-			io.output(
-					parameters.getName()+"_gauge1_out",
-					gauge1_in,
-					QCDConstants.getVectoredSu3Type());*/
-			if (mode == Mode.TIMES) {
-				io.output(
-						parameters.getName()+"_p_spinor_out",
-						spinor_in,
-						QCDConstants.getVectoredSpinorType(),
-						writeChainEnable & (iter===0) & ( t > 1 ) & ( t < T+2*halos-2 ) );
-			}
-		}
 
 	}
 

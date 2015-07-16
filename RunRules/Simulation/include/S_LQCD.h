@@ -29,14 +29,21 @@ extern "C" {
  * \param [in] ticks_gReadCmdKernel The number of ticks for which kernel "gReadCmdKernel" will run.
  * \param [in] ticks_gWriteCmdKernel The number of ticks for which kernel "gWriteCmdKernel" will run.
  * \param [in] ticks_spReadCmdKernel0 The number of ticks for which kernel "spReadCmdKernel0" will run.
+ * \param [in] ticks_spReadCmdKernel1 The number of ticks for which kernel "spReadCmdKernel1" will run.
  * \param [in] ticks_spWriteCmdKernel The number of ticks for which kernel "spWriteCmdKernel" will run.
+ * \param [in] inscalar_diracKernel_alpha Input scalar parameter "diracKernel.alpha".
  * \param [in] inscalar_diracKernel_beta_s Input scalar parameter "diracKernel.beta_s".
  * \param [in] inscalar_diracKernel_beta_t_b Input scalar parameter "diracKernel.beta_t_b".
  * \param [in] inscalar_diracKernel_beta_t_f Input scalar parameter "diracKernel.beta_t_f".
+ * \param [in] inscalar_diracKernel_doSub Input scalar parameter "diracKernel.doSub".
+ * \param [in] inscalar_diracKernel_ieo Input scalar parameter "diracKernel.ieo".
+ * \param [in] inscalar_diracKernel_isign Input scalar parameter "diracKernel.isign".
  * \param [in] inscalar_gReadCmdKernel_startAddress Input scalar parameter "gReadCmdKernel.startAddress".
  * \param [in] inscalar_gWriteCmdKernel_startAddress Input scalar parameter "gWriteCmdKernel.startAddress".
  * \param [in] inscalar_spReadCmdKernel0_halos Input scalar parameter "spReadCmdKernel0.halos".
  * \param [in] inscalar_spReadCmdKernel0_startAddress Input scalar parameter "spReadCmdKernel0.startAddress".
+ * \param [in] inscalar_spReadCmdKernel1_halos Input scalar parameter "spReadCmdKernel1.halos".
+ * \param [in] inscalar_spReadCmdKernel1_startAddress Input scalar parameter "spReadCmdKernel1.startAddress".
  * \param [in] inscalar_spWriteCmdKernel_halos Input scalar parameter "spWriteCmdKernel.halos".
  * \param [in] inscalar_spWriteCmdKernel_startAddress Input scalar parameter "spWriteCmdKernel.startAddress".
  * \param [in] instream_gauge_in Stream "gauge_in".
@@ -52,14 +59,21 @@ void S_LQCD(
 	uint64_t ticks_gReadCmdKernel,
 	uint64_t ticks_gWriteCmdKernel,
 	uint64_t ticks_spReadCmdKernel0,
+	uint64_t ticks_spReadCmdKernel1,
 	uint64_t ticks_spWriteCmdKernel,
+	double inscalar_diracKernel_alpha,
 	double inscalar_diracKernel_beta_s,
 	double inscalar_diracKernel_beta_t_b,
 	double inscalar_diracKernel_beta_t_f,
+	uint64_t inscalar_diracKernel_doSub,
+	uint64_t inscalar_diracKernel_ieo,
+	uint64_t inscalar_diracKernel_isign,
 	uint64_t inscalar_gReadCmdKernel_startAddress,
 	uint64_t inscalar_gWriteCmdKernel_startAddress,
 	uint64_t inscalar_spReadCmdKernel0_halos,
 	uint64_t inscalar_spReadCmdKernel0_startAddress,
+	uint64_t inscalar_spReadCmdKernel1_halos,
+	uint64_t inscalar_spReadCmdKernel1_startAddress,
 	uint64_t inscalar_spWriteCmdKernel_halos,
 	uint64_t inscalar_spWriteCmdKernel_startAddress,
 	const void *instream_gauge_in,
@@ -82,14 +96,21 @@ void S_LQCD(
  * \param [in] ticks_gReadCmdKernel The number of ticks for which kernel "gReadCmdKernel" will run.
  * \param [in] ticks_gWriteCmdKernel The number of ticks for which kernel "gWriteCmdKernel" will run.
  * \param [in] ticks_spReadCmdKernel0 The number of ticks for which kernel "spReadCmdKernel0" will run.
+ * \param [in] ticks_spReadCmdKernel1 The number of ticks for which kernel "spReadCmdKernel1" will run.
  * \param [in] ticks_spWriteCmdKernel The number of ticks for which kernel "spWriteCmdKernel" will run.
+ * \param [in] inscalar_diracKernel_alpha Input scalar parameter "diracKernel.alpha".
  * \param [in] inscalar_diracKernel_beta_s Input scalar parameter "diracKernel.beta_s".
  * \param [in] inscalar_diracKernel_beta_t_b Input scalar parameter "diracKernel.beta_t_b".
  * \param [in] inscalar_diracKernel_beta_t_f Input scalar parameter "diracKernel.beta_t_f".
+ * \param [in] inscalar_diracKernel_doSub Input scalar parameter "diracKernel.doSub".
+ * \param [in] inscalar_diracKernel_ieo Input scalar parameter "diracKernel.ieo".
+ * \param [in] inscalar_diracKernel_isign Input scalar parameter "diracKernel.isign".
  * \param [in] inscalar_gReadCmdKernel_startAddress Input scalar parameter "gReadCmdKernel.startAddress".
  * \param [in] inscalar_gWriteCmdKernel_startAddress Input scalar parameter "gWriteCmdKernel.startAddress".
  * \param [in] inscalar_spReadCmdKernel0_halos Input scalar parameter "spReadCmdKernel0.halos".
  * \param [in] inscalar_spReadCmdKernel0_startAddress Input scalar parameter "spReadCmdKernel0.startAddress".
+ * \param [in] inscalar_spReadCmdKernel1_halos Input scalar parameter "spReadCmdKernel1.halos".
+ * \param [in] inscalar_spReadCmdKernel1_startAddress Input scalar parameter "spReadCmdKernel1.startAddress".
  * \param [in] inscalar_spWriteCmdKernel_halos Input scalar parameter "spWriteCmdKernel.halos".
  * \param [in] inscalar_spWriteCmdKernel_startAddress Input scalar parameter "spWriteCmdKernel.startAddress".
  * \param [in] instream_gauge_in Stream "gauge_in".
@@ -106,14 +127,21 @@ max_run_t *S_LQCD_nonblock(
 	uint64_t ticks_gReadCmdKernel,
 	uint64_t ticks_gWriteCmdKernel,
 	uint64_t ticks_spReadCmdKernel0,
+	uint64_t ticks_spReadCmdKernel1,
 	uint64_t ticks_spWriteCmdKernel,
+	double inscalar_diracKernel_alpha,
 	double inscalar_diracKernel_beta_s,
 	double inscalar_diracKernel_beta_t_b,
 	double inscalar_diracKernel_beta_t_f,
+	uint64_t inscalar_diracKernel_doSub,
+	uint64_t inscalar_diracKernel_ieo,
+	uint64_t inscalar_diracKernel_isign,
 	uint64_t inscalar_gReadCmdKernel_startAddress,
 	uint64_t inscalar_gWriteCmdKernel_startAddress,
 	uint64_t inscalar_spReadCmdKernel0_halos,
 	uint64_t inscalar_spReadCmdKernel0_startAddress,
+	uint64_t inscalar_spReadCmdKernel1_halos,
+	uint64_t inscalar_spReadCmdKernel1_startAddress,
 	uint64_t inscalar_spWriteCmdKernel_halos,
 	uint64_t inscalar_spWriteCmdKernel_startAddress,
 	const void *instream_gauge_in,
@@ -133,14 +161,21 @@ typedef struct {
 	uint64_t ticks_gReadCmdKernel; /**<  [in] The number of ticks for which kernel "gReadCmdKernel" will run. */
 	uint64_t ticks_gWriteCmdKernel; /**<  [in] The number of ticks for which kernel "gWriteCmdKernel" will run. */
 	uint64_t ticks_spReadCmdKernel0; /**<  [in] The number of ticks for which kernel "spReadCmdKernel0" will run. */
+	uint64_t ticks_spReadCmdKernel1; /**<  [in] The number of ticks for which kernel "spReadCmdKernel1" will run. */
 	uint64_t ticks_spWriteCmdKernel; /**<  [in] The number of ticks for which kernel "spWriteCmdKernel" will run. */
+	double inscalar_diracKernel_alpha; /**<  [in] Input scalar parameter "diracKernel.alpha". */
 	double inscalar_diracKernel_beta_s; /**<  [in] Input scalar parameter "diracKernel.beta_s". */
 	double inscalar_diracKernel_beta_t_b; /**<  [in] Input scalar parameter "diracKernel.beta_t_b". */
 	double inscalar_diracKernel_beta_t_f; /**<  [in] Input scalar parameter "diracKernel.beta_t_f". */
+	uint64_t inscalar_diracKernel_doSub; /**<  [in] Input scalar parameter "diracKernel.doSub". */
+	uint64_t inscalar_diracKernel_ieo; /**<  [in] Input scalar parameter "diracKernel.ieo". */
+	uint64_t inscalar_diracKernel_isign; /**<  [in] Input scalar parameter "diracKernel.isign". */
 	uint64_t inscalar_gReadCmdKernel_startAddress; /**<  [in] Input scalar parameter "gReadCmdKernel.startAddress". */
 	uint64_t inscalar_gWriteCmdKernel_startAddress; /**<  [in] Input scalar parameter "gWriteCmdKernel.startAddress". */
 	uint64_t inscalar_spReadCmdKernel0_halos; /**<  [in] Input scalar parameter "spReadCmdKernel0.halos". */
 	uint64_t inscalar_spReadCmdKernel0_startAddress; /**<  [in] Input scalar parameter "spReadCmdKernel0.startAddress". */
+	uint64_t inscalar_spReadCmdKernel1_halos; /**<  [in] Input scalar parameter "spReadCmdKernel1.halos". */
+	uint64_t inscalar_spReadCmdKernel1_startAddress; /**<  [in] Input scalar parameter "spReadCmdKernel1.startAddress". */
 	uint64_t inscalar_spWriteCmdKernel_halos; /**<  [in] Input scalar parameter "spWriteCmdKernel.halos". */
 	uint64_t inscalar_spWriteCmdKernel_startAddress; /**<  [in] Input scalar parameter "spWriteCmdKernel.startAddress". */
 	const void *instream_gauge_in; /**<  [in] Stream "gauge_in". */

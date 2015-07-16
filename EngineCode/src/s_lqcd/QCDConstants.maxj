@@ -4,6 +4,7 @@ import com.maxeler.maxcompiler.v0.utils.MathUtils;
 import com.maxeler.maxcompiler.v2.kernelcompiler.Kernel;
 import com.maxeler.maxcompiler.v2.kernelcompiler.KernelLib;
 import com.maxeler.maxcompiler.v2.kernelcompiler.types.base.DFEType;
+import com.maxeler.maxcompiler.v2.kernelcompiler.types.base.DFEVar;
 import com.maxeler.maxcompiler.v2.kernelcompiler.types.composite.DFEComplex;
 import com.maxeler.maxcompiler.v2.kernelcompiler.types.composite.DFEComplexType;
 import com.maxeler.maxcompiler.v2.kernelcompiler.types.composite.DFEVectorType;
@@ -11,7 +12,7 @@ import com.maxeler.maxcompiler.v2.kernelcompiler.types.composite.DFEVectorType;
 public class QCDConstants extends KernelLib {
 
 	public int LX, LY, LZ, T, numPipes, loopOffset, halos;
-	S_LQCDKernel.EO ieo;
+	public DFEVar ieo;
 	public static DFEType realType = dfeFloat(8,24);
 	public static DFEComplexType complexType = new DFEComplexType(realType);
 
@@ -24,7 +25,7 @@ public class QCDConstants extends KernelLib {
 			int numPipes_,
 			int loopOffset_,
 			int halos_,
-			S_LQCDKernel.EO ieo_) {
+			DFEVar ieo_) {
 		super(owner);
 		LX = LX_;
 		LY = LY_;
@@ -56,15 +57,10 @@ public class QCDConstants extends KernelLib {
 			throw new RuntimeException("loopOffset should divide LY*LX/2");
 		}
 
-		if (numPipes < 1 || numPipes > 16 | !MathUtils.isPowerOf2(numPipes)) {
-			throw new RuntimeException("Number of pipes should be a positive integer that divides 16");
+		if (numPipes < 2 || numPipes > 16 || !MathUtils.isPowerOf2(numPipes)) {
+			throw new RuntimeException("Number of pipes should be a positive integer that divides 16 and is greater than 1");
 		}
 
-		//TODO this is temporary. With some small tweaks any power of 2 less than 16
-		//should work
-		if (numPipes != 2 && numPipes != 4) {
-			throw new RuntimeException("Number of pipes can only be 2 and 4");
-		}
 	}
 
 	static public DFEVectorType<DFEComplex> getVectoredSpinorType () {
@@ -73,9 +69,9 @@ public class QCDConstants extends KernelLib {
 		return type;
 	}
 
-	static public DFEVectorType<DFEComplex> getVectoredSu3Type () {
+	static public DFEVectorType<DFEComplex> getVectoredSu3Type (int numPipes_) {
 		DFEVectorType<DFEComplex> type =
-			new DFEVectorType<DFEComplex>(complexType,9);
+			new DFEVectorType<DFEComplex>(complexType,9*(numPipes_/2));
 		return type;
 	}
 
