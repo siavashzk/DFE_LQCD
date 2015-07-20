@@ -45,7 +45,7 @@ class S_LQCDKernel extends Kernel {
 
 		HalfSpinorBuffer buffer = new HalfSpinorBuffer(constants);
 
-		optimization.pushPipeliningFactor(0.1);
+		optimization.pushPipeliningFactor(0.5);
 		CounterChain tickChain = control.count.makeCounterChain();
 		DFEVar tick = tickChain.addCounter(
 				ticksPerSite *( (T+2*halos)*LZ*LY*LX/2 + loopOffset ) + 2,

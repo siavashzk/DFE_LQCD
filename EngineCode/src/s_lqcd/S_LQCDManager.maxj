@@ -6,6 +6,7 @@ import com.maxeler.maxcompiler.v2.managers.custom.DFELink;
 import com.maxeler.maxcompiler.v2.managers.custom.blocks.Demux;
 import com.maxeler.maxcompiler.v2.managers.custom.blocks.KernelBlock;
 import com.maxeler.maxcompiler.v2.managers.custom.blocks.Mux;
+import com.maxeler.maxcompiler.v2.managers.custom.stdlib.MemoryControllerConfig;
 
 public class S_LQCDManager extends CustomManager {
 
@@ -17,8 +18,18 @@ public class S_LQCDManager extends CustomManager {
 		int LX = engineParameters.getLX();
 		int LY = engineParameters.getLY();
 		int LZ = engineParameters.getLZ();
+		int spCmdSize = engineParameters.getSpCmdSize();
+		int gCmdSize  = engineParameters.getGCmdSize();
 
 		int XYZ = LX*LY*LZ / 2;
+
+//		config.setOnCardMemoryFrequency(800);
+		MemoryControllerConfig memCfg = new MemoryControllerConfig();
+		memCfg.setBurstSize(8);
+		memCfg.setMAX4qMode(true);
+		memCfg.setEnableParityMode(true, true, 72, false);
+		config.setMemoryControllerConfig(memCfg);
+		config.setOnCardMemoryFrequency(LMemFrequency.MAX4MAIA_800);
 
 		KernelBlock diracKernel = addKernel(
 				new S_LQCDKernel(
@@ -33,79 +44,41 @@ public class S_LQCDManager extends CustomManager {
 						false
 				)
 		);
-		/*KernelBlock sub1block = addKernel(
-				new S_LQCDKernel(
-						makeKernelParameters(kernel_names[1]),
-						T,
-						LX,
-						LY,
-						LZ,
-						engineParameters.getNumPipes(),
-						engineParameters.getLoopOffset(),
-						S_LQCDKernel.Mode.SUB,
-						S_LQCDKernel.EO.ODDEVEN,
-						1,
-						false
-				)
-		);*/
-
-
-		/*KernelBlock times2block = addKernel(
-				new S_LQCDKernel(
-						makeKernelParameters(kernel_names[2]),
-						engineParameters.getL()+2,
-						engineParameters.getT()+2,
-						S_LQCDKernel.Mode.TIMES,
-						S_LQCDKernel.EO.ODDEVEN,
-						true
-				)
-		);
-		KernelBlock sub2block = addKernel(
-				new S_LQCDKernel(
-						makeKernelParameters(kernel_names[3]),
-						engineParameters.getL(),
-						engineParameters.getT(),
-						S_LQCDKernel.Mode.SUB,
-						S_LQCDKernel.EO.EVENODD,
-						false
-				)
-		);*/
 
 		AddressGeneratorGauge gWriteCmdKernel = new AddressGeneratorGauge(
 				makeKernelParameters("gWriteCmdKernel"),
-				T, XYZ, 0,
+				T, XYZ, 0, gCmdSize,
 				"gWriteCmdOut");
 		DFELink gtoLmem = addStreamToOnCardMemory("gtoLmem", addKernel(gWriteCmdKernel).getOutput("gWriteCmdOut"));
 		gtoLmem <== addStreamFromCPU("gauge_in");
 
 		AddressGeneratorGauge gReadCmdKernel = new AddressGeneratorGauge(
 				makeKernelParameters("gReadCmdKernel"),
-				T, XYZ, 1,
+				T, XYZ, 1, gCmdSize,
 				"gReadCmdOut");
 		DFELink gfromLmem = addStreamFromOnCardMemory("gfromlmem", addKernel(gReadCmdKernel).getOutput("gReadCmdOut"));
 
 		AddressGeneratorSpinor spWriteCmdKernel = new AddressGeneratorSpinor(
 				makeKernelParameters("spWriteCmdKernel"),
-				T, XYZ,
+				T, XYZ, spCmdSize,
 				"spWriteCmdOut");
 		DFELink sptoLmem = addStreamToOnCardMemory("sptoLmem", addKernel(spWriteCmdKernel).getOutput("spWriteCmdOut"));
 
 		AddressGeneratorSpinor spReadCmdKernel0 = new AddressGeneratorSpinor(
 				makeKernelParameters("spReadCmdKernel0"),
-				T, XYZ,
+				T, XYZ, spCmdSize,
 				"spReadCmdOut0");
 		DFELink spfromLmem0 = addStreamFromOnCardMemory("spfromlmem0", addKernel(spReadCmdKernel0).getOutput("spReadCmdOut0"));
 
 		AddressGeneratorSpinor spReadCmdKernel1 = new AddressGeneratorSpinor(
 				makeKernelParameters("spReadCmdKernel1"),
-				T, XYZ,
+				T, XYZ, spCmdSize,
 				"spReadCmdOut1");
 		DFELink spfromLmem1 = addStreamFromOnCardMemory("spfromlmem1", addKernel(spReadCmdKernel1).getOutput("spReadCmdOut1"));
 
-		/*for (String inputName: times1block.getAllInputs())
-			times1block.getInput(inputName).connect(addStreamFromCPU(inputName));*/
 
 		diracKernel.getInput("diracKernel_gauge")     <== gfromLmem;
+
 
 		Demux spfromLmem0Demux = demux("spfromLmem0Demux");
 		spfromLmem0Demux.getInput() <== spfromLmem0;
@@ -120,43 +93,12 @@ public class S_LQCDManager extends CustomManager {
 
 		sptoLmem <== sptoLmemMux.getOutput();
 
-
-
-		/*DFELink x1 = times1block.getOutput("diracKernel_spinor_out");
-		_CustomManagers.setStreamBufferSpaceRequirement(x1, 1024*64*768);
-		sub1block.getInput("sub1kernel_spinor_in") <== x1;
-
-		DFELink x2 = times1block.getOutput("diracKernel_p_spinor_out");
-		_CustomManagers.setStreamBufferSpaceRequirement(x2, 1024*64*768);
-		sub1block.getInput("sub1kernel_p_spinor_in") <== x2;*/
-
-		//sub1block.getInput("sub1kernel_p_spinor_in") <== addStreamFromCPU("sub1kernel_p_spinor_in");
-
-		//sub1block.getInput("sub1kernel_gauge") <== gfromLmem;
-		//sub1block.getInput("sub1kernel_gauge") <== addStreamFromCPU("sub1kernel_gauge");
-		//sub1block.getInput("sub1kernel_gauge1") <== addStreamFromCPU("sub1kernel_gauge1");
-
-		/*DFELink x1 = times1block.getOutput("diracKernel_spinor_out");
-		DFELink x2 = times1block.getOutput("diracKernel_p_spinor_out");
-		DFELink x3 = times1block.getOutput("diracKernel_gauge1_out");
-		DFELink x4 = times1block.getOutput("diracKernel_gauge0_out");
-
-		_CustomManagers.setStreamBufferSpaceRequirement(x1, 1536*2048);
-		_CustomManagers.setStreamBufferSpaceRequirement(x2, 1536*2048);
-		_CustomManagers.setStreamBufferSpaceRequirement(x3, 4608*2048);
-		_CustomManagers.setStreamBufferSpaceRequirement(x4, 4608*2048);
-
-		sub1block.getInput("sub1kernel_spinor_in") <== x1;
-		sub1block.getInput("sub1kernel_p_spinor_in") <== x2;
-		sub1block.getInput("sub1kernel_gauge0") <== x3;
-		sub1block.getInput("sub1kernel_gauge1") <== x4;*/
+		//_CustomManagers.setStreamBufferSpaceRequirement(x4, 4608*2048);
 
 
 		setParameter("quartus_map.ram_usage", "48000");
 		config.setAllowNonMultipleTransitions(true);
 
-		/*for (String outputName: times1block.getAllOutputs())
-			addStreamToCPU(outputName).connect(times1block.getOutput(outputName));*/
 
 		/*DebugLevel MyDebugLevel = new DebugLevel();
 		MyDebugLevel.setHasStreamStatus(true);
@@ -170,6 +112,8 @@ public class S_LQCDManager extends CustomManager {
 		addMaxFileConstant("LZ", engineParameters.getLZ());
 		addMaxFileConstant("numPipes", engineParameters.getNumPipes());
 		addMaxFileConstant("loopOffset", engineParameters.getLoopOffset());
+		addMaxFileConstant("spCmdSize", engineParameters.getSpCmdSize());
+		addMaxFileConstant("gCmdSize", engineParameters.getGCmdSize());
 	}
 
 	private void configBuild(S_LQCDEngineParameters params) {

@@ -8,23 +8,32 @@ public class S_LQCDEngineParameters extends EngineParameters {
 		super(args);
 	}
 
-	private static final String s_LX = "LX";
-	private static final String s_LY = "LY";
-	private static final String s_LZ = "LZ";
-	private static final String s_T = "T";
-	private static final String s_numPipes = "P";
+	private static final String s_LX         = "LX";
+	private static final String s_LY         = "LY";
+	private static final String s_LZ         = "LZ";
+	private static final String s_T          = "T";
+	private static final String s_numPipes   = "P";
 	private static final String s_loopOffset = "LOOP_OFFSET";
-	private static final String s_volume = "VOLUME";
+	private static final String s_volume     = "VOLUME";
+	private static final String s_frequency  = "frequency";
+	private static final String s_effort     = "buildEffort";
+	private static final String s_SpCmdSize  = "spCmdSize";
+	private static final String s_GCmdSize   = "GCmdSize";
 
 	@Override
 	protected void declarations() {
-		declareParam(s_T, DataType.INT, 10);
-		declareParam(s_LZ, DataType.INT, 4);
-		declareParam(s_LY, DataType.INT, 10);
-		declareParam(s_LX, DataType.INT, 6);
-		declareParam(s_numPipes, DataType.INT, 2);
-		declareParam(s_loopOffset, DataType.INT, 15); // should divide LX*LY/2
-		declareParam(s_volume, DataType.INT, 256);
+		declareParam(s_T,          DataType.INT, 128);
+		declareParam(s_LZ,         DataType.INT, 16);
+		declareParam(s_LY,         DataType.INT, 16);
+		declareParam(s_LX,         DataType.INT, 32);
+		declareParam(s_numPipes,   DataType.INT, 8);
+		declareParam(s_loopOffset, DataType.INT, 16); // should divide LX*LY/2
+		declareParam(s_SpCmdSize,  DataType.INT, 128);  // should divide LX*LY*LZ/2*24*4  /384
+		declareParam(s_GCmdSize,   DataType.INT, 128);  // should divide LX*LY*LZ/2*18*4*8/384
+		declareParam(s_volume,     DataType.INT, 256);
+
+		//declareParam(s_frequency,  DataType.INT, 100);
+		//declareParam(s_effort,     Effort.class, Effort.HIGH);
 
 	}
 
@@ -65,6 +74,14 @@ public class S_LQCDEngineParameters extends EngineParameters {
 
 	public int getVolume(){
 		return getParam(s_volume);
+	}
+
+	public int getSpCmdSize(){
+		return getParam(s_SpCmdSize);
+	}
+
+	public int getGCmdSize(){
+		return getParam(s_GCmdSize);
 	}
 
 	@Override

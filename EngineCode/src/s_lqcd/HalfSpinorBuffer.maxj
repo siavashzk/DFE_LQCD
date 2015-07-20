@@ -45,7 +45,7 @@ public class HalfSpinorBuffer extends KernelLib {
 
 		int loopOffset = m_constants.loopOffset;
 
-		bufferDepth   = MathUtils.nextMultiple(m_vectorsPerSite*(loopOffset + 20 + 3*LX*LY*LZ/2), singleBRAMdepth);
+		bufferDepth   = MathUtils.nextMultiple(m_vectorsPerSite*(loopOffset + 20 + 2*LX*LY*LZ/2), singleBRAMdepth);
 		//bufferDepthTF = MathUtils.nextMultiple(m_vectorsPerSite*loopOffset + 1 + 2*LX*LY*LZ/2, singleBRAMdepth);
 		//bufferDepthTB = MathUtils.nextMultiple(m_vectorsPerSite*loopOffset + 1               , singleBRAMdepth);
 
