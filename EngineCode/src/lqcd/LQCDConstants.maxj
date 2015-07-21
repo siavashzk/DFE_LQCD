@@ -1,4 +1,4 @@
-package s_lqcd;
+package lqcd;
 
 import com.maxeler.maxcompiler.v0.utils.MathUtils;
 import com.maxeler.maxcompiler.v2.kernelcompiler.Kernel;
@@ -9,14 +9,14 @@ import com.maxeler.maxcompiler.v2.kernelcompiler.types.composite.DFEComplex;
 import com.maxeler.maxcompiler.v2.kernelcompiler.types.composite.DFEComplexType;
 import com.maxeler.maxcompiler.v2.kernelcompiler.types.composite.DFEVectorType;
 
-public class QCDConstants extends KernelLib {
+public class LQCDConstants extends KernelLib {
 
 	public int LX, LY, LZ, T, numPipes, loopOffset, halos;
 	public DFEVar ieo;
 	public static DFEType realType = dfeFloat(8,24);
 	public static DFEComplexType complexType = new DFEComplexType(realType);
 
-	protected QCDConstants (
+	protected LQCDConstants (
 			Kernel owner,
 			int LX_,
 			int LY_,

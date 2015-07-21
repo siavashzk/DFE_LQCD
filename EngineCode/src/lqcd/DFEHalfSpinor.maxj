@@ -1,4 +1,4 @@
-package s_lqcd;
+package lqcd;
 
 import com.maxeler.maxcompiler.v2.kernelcompiler.KernelLib;
 import com.maxeler.maxcompiler.v2.kernelcompiler.types.composite.DFEComplex;
@@ -8,14 +8,14 @@ public class DFEHalfSpinor extends KernelLib {
 
 	public DFESu3Vector s0, s1;
 
-	private final QCDConstants m_constants;
+	private final LQCDConstants m_constants;
 
-	protected DFEHalfSpinor(QCDConstants constants) {
+	protected DFEHalfSpinor(LQCDConstants constants) {
 		super(constants.getKernel());
 		m_constants = constants;
 	}
 
-	protected DFEHalfSpinor(QCDConstants constants, DFEVector<DFEComplex> in) {
+	protected DFEHalfSpinor(LQCDConstants constants, DFEVector<DFEComplex> in) {
 		super(constants.getKernel());
 		m_constants = constants;
 		s0 = new DFESu3Vector (m_constants);
@@ -58,7 +58,7 @@ public class DFEHalfSpinor extends KernelLib {
 
 	public DFEVector<DFEComplex> convertToDFEVector () {
 		DFEVector<DFEComplex> result =
-			QCDConstants.getVectoredHalfSpinorType().newInstance(m_constants);
+			LQCDConstants.getVectoredHalfSpinorType().newInstance(m_constants);
 
 		result[0]  <== s0.c0;
 		result[1]  <== s0.c1;

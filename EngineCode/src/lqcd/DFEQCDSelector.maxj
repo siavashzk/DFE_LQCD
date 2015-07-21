@@ -1,4 +1,4 @@
-package s_lqcd;
+package lqcd;
 
 import com.maxeler.maxcompiler.v2.kernelcompiler.KernelLib;
 import com.maxeler.maxcompiler.v2.kernelcompiler.types.base.DFEVar;
@@ -8,14 +8,14 @@ public class DFEQCDSelector extends KernelLib {
 
 	private DFEVar selector;
 
-	private final QCDConstants m_constants;
+	private final LQCDConstants m_constants;
 
-	protected DFEQCDSelector(QCDConstants constants) {
+	protected DFEQCDSelector(LQCDConstants constants) {
 		super(constants.getKernel());
 		m_constants = constants;
 	}
 
-	protected DFEQCDSelector(QCDConstants constants, DFEVar v) {
+	protected DFEQCDSelector(LQCDConstants constants, DFEVar v) {
 		super(constants.getKernel());
 		m_constants = constants;
 		selector = v;

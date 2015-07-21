@@ -1,4 +1,4 @@
-package s_lqcd;
+package lqcd;
 
 import com.maxeler.maxcompiler.v2.kernelcompiler.KernelLib;
 import com.maxeler.maxcompiler.v2.kernelcompiler.types.base.DFEVar;
@@ -9,15 +9,15 @@ public class DFESpinor extends KernelLib {
 
 	public DFESu3Vector s0, s1, s2, s3;
 
-	private final QCDConstants m_constants;
+	private final LQCDConstants m_constants;
 
 
-	protected DFESpinor(QCDConstants constants) {
+	protected DFESpinor(LQCDConstants constants) {
 		super(constants.getKernel());
 		m_constants = constants;
 	}
 
-	protected DFESpinor(QCDConstants constants, DFEVector<DFEComplex> in) {
+	protected DFESpinor(LQCDConstants constants, DFEVector<DFEComplex> in) {
 		super(constants.getKernel());
 		m_constants = constants;
 		s0 = new DFESu3Vector (m_constants);
@@ -104,7 +104,7 @@ public class DFESpinor extends KernelLib {
 
 	public DFEVector<DFEComplex> convertToDFEVector () {
 		DFEVector<DFEComplex> result =
-			QCDConstants.getVectoredSpinorType().newInstance(m_constants.getKernel());
+			LQCDConstants.getVectoredSpinorType().newInstance(m_constants.getKernel());
 
 		result[0]  <== s0.c0;
 		result[1]  <== s0.c1;

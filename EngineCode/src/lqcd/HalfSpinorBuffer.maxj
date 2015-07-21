@@ -1,4 +1,4 @@
-package s_lqcd;
+package lqcd;
 
 import com.maxeler.maxcompiler.v2.kernelcompiler.Kernel;
 import com.maxeler.maxcompiler.v2.kernelcompiler.KernelLib;
@@ -15,7 +15,7 @@ public class HalfSpinorBuffer extends KernelLib {
 
 	private final int singleBRAMdepth = 512;
 
-	private final QCDConstants m_constants;
+	private final LQCDConstants m_constants;
 
 	private DFEVar write_t, write_x, write_y, write_z;
 
@@ -33,7 +33,7 @@ public class HalfSpinorBuffer extends KernelLib {
 
 	int bufferDepth, bufferDepthTF, bufferDepthTB;
 
-	protected HalfSpinorBuffer(QCDConstants constants) {
+	protected HalfSpinorBuffer(LQCDConstants constants) {
 		super(constants.getKernel());
 		m_constants = constants;
 		LX = m_constants.LX;
@@ -150,7 +150,7 @@ public class HalfSpinorBuffer extends KernelLib {
 				mem.makeRamPortParams(
 						RamPortMode.WRITE_ONLY,
 						writeAddress,
-						QCDConstants.getVectoredSu3VectorType()
+						LQCDConstants.getVectoredSu3VectorType()
 						)
 						.withDataIn(in)
 						.withWriteEnable(writeEnable);
@@ -159,7 +159,7 @@ public class HalfSpinorBuffer extends KernelLib {
 				mem.makeRamPortParams(
 						RamPortMode.READ_ONLY,
 						readAddress[i],
-						QCDConstants.getVectoredSu3VectorType());
+						LQCDConstants.getVectoredSu3VectorType());
 
 			DFEVector<DFEComplex> ram =
 				mem.ramDualPort(

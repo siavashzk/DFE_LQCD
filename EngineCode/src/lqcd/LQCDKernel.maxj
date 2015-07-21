@@ -1,4 +1,4 @@
-package s_lqcd;
+package lqcd;
 
 import com.maxeler.maxcompiler.v0.utils.MathUtils;
 import com.maxeler.maxcompiler.v2.kernelcompiler.Kernel;
@@ -9,9 +9,9 @@ import com.maxeler.maxcompiler.v2.kernelcompiler.types.base.DFEVar;
 import com.maxeler.maxcompiler.v2.kernelcompiler.types.composite.DFEComplex;
 import com.maxeler.maxcompiler.v2.kernelcompiler.types.composite.DFEVector;
 
-class S_LQCDKernel extends Kernel {
+class LQCDKernel extends Kernel {
 
-	protected S_LQCDKernel(
+	protected LQCDKernel(
 			KernelParameters parameters,
 			int T,
 			int LX,
@@ -32,7 +32,7 @@ class S_LQCDKernel extends Kernel {
 		DFEVar doSub   = io.scalarInput("doSub", dfeBool() );
 		DFEVar negSign   = io.scalarInput("isign", dfeBool() );
 
-		QCDConstants constants = new QCDConstants(
+		LQCDConstants constants = new LQCDConstants(
 				this,
 				LX,
 				LY,
@@ -68,18 +68,18 @@ class S_LQCDKernel extends Kernel {
 		DFEVector<DFEComplex> spinor_in =
 			io.input(
 				parameters.getName()+"_spinor_in",
-				QCDConstants.getVectoredSpinorType(),
+				LQCDConstants.getVectoredSpinorType(),
 				writeChainEnable & (iter===0)
 				);
 		DFEVector<DFEComplex> gauge_in =
 			io.input(
 					parameters.getName()+"_gauge",
-					QCDConstants.getVectoredSu3Type(numPipes),
+					LQCDConstants.getVectoredSu3Type(numPipes),
 					writeChainEnable );
 
-		DFEVar beta_s   = io.scalarInput("beta_s",   QCDConstants.realType );
-		DFEVar beta_t_f = io.scalarInput("beta_t_f", QCDConstants.realType );
-		DFEVar beta_t_b = io.scalarInput("beta_t_b", QCDConstants.realType );
+		DFEVar beta_s   = io.scalarInput("beta_s",   LQCDConstants.realType );
+		DFEVar beta_t_f = io.scalarInput("beta_t_f", LQCDConstants.realType );
+		DFEVar beta_t_b = io.scalarInput("beta_t_b", LQCDConstants.realType );
 
 		DFESpinor k = new DFESpinor(constants, spinor_in);
 		DFESu3 gauges[] = new DFESu3[numPipes/2];
@@ -255,10 +255,10 @@ class S_LQCDKernel extends Kernel {
 		DFESpinor addend1     = new DFESpinor(constants);
 		DFESpinor accumulator = new DFESpinor(constants);
 
-		DFEVar alpha = io.scalarInput("alpha", QCDConstants.realType );
+		DFEVar alpha = io.scalarInput("alpha", LQCDConstants.realType );
 		DFEVector<DFEComplex> p_spinor_in = io.input(
 					parameters.getName()+"_p_spinor_in",
-					QCDConstants.getVectoredSpinorType(),
+					LQCDConstants.getVectoredSpinorType(),
 					doSub & readChainEnable & (iterr===0)
 					);
 		DFESpinor p = new DFESpinor(constants, p_spinor_in);
@@ -283,7 +283,7 @@ class S_LQCDKernel extends Kernel {
 		io.output(
 				parameters.getName()+"_spinor_out",
 				spinor_out,
-				QCDConstants.getVectoredSpinorType(),
+				LQCDConstants.getVectoredSpinorType(),
 				readChainEnable & (iterr===(16/numPipes-1))
 				);
 

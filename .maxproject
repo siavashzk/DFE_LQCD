@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<maxCompilerManager version="2">
-<enginePart internalEngineSubproject="DFE_QPHIX_EngineCode" isSrcBin="false" isUseDefaultSelected="false" outputLocation="/DFE_QPHIX_EngineCode/bin" projectName="DFE_QPHIX"/>
-<cpuPart internalCpuSubproject="DFE_QPHIX_CPUCode"/>
-<watchedFiles/>
-</maxCompilerManager>

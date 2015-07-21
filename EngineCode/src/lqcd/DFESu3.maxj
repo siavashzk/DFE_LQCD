@@ -1,4 +1,4 @@
-package s_lqcd;
+package lqcd;
 
 import com.maxeler.maxcompiler.v2.kernelcompiler.KernelLib;
 import com.maxeler.maxcompiler.v2.kernelcompiler.types.composite.DFEComplex;
@@ -11,9 +11,9 @@ public class DFESu3 extends KernelLib  {
 	                  c20, c21, c22;
 
 
-	private final QCDConstants m_constants;
+	private final LQCDConstants m_constants;
 
-	protected DFESu3(QCDConstants constants) {
+	protected DFESu3(LQCDConstants constants) {
 		super(constants.getKernel());
 		m_constants = constants;
 		/*c00 = m_cplxType.newInstance(constants.getKernel());
@@ -27,7 +27,7 @@ public class DFESu3 extends KernelLib  {
 		c22 = m_cplxType.newInstance(constants.getKernel());*/
 	}
 
-	protected DFESu3(QCDConstants constants, DFEVector<DFEComplex> su3, int gauge_index) {
+	protected DFESu3(LQCDConstants constants, DFEVector<DFEComplex> su3, int gauge_index) {
 		super(constants.getKernel());
 		m_constants = constants;
 		c00 = su3[gauge_index*9+0];

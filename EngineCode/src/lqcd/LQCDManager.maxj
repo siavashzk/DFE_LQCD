@@ -1,4 +1,4 @@
-package s_lqcd;
+package lqcd;
 
 import com.maxeler.maxcompiler.v2.managers.BuildConfig;
 import com.maxeler.maxcompiler.v2.managers.custom.CustomManager;
@@ -8,10 +8,10 @@ import com.maxeler.maxcompiler.v2.managers.custom.blocks.KernelBlock;
 import com.maxeler.maxcompiler.v2.managers.custom.blocks.Mux;
 import com.maxeler.maxcompiler.v2.managers.custom.stdlib.MemoryControllerConfig;
 
-public class S_LQCDManager extends CustomManager {
+public class LQCDManager extends CustomManager {
 
 
-	public S_LQCDManager(S_LQCDEngineParameters engineParameters) {
+	public LQCDManager(LQCDEngineParameters engineParameters) {
 		super(engineParameters);
 
 		int T  = engineParameters.getT();
@@ -24,6 +24,8 @@ public class S_LQCDManager extends CustomManager {
 		int XYZ = LX*LY*LZ / 2;
 
 //		config.setOnCardMemoryFrequency(800);
+		config.setDefaultStreamClockFrequency(engineParameters.getFreq());
+
 		MemoryControllerConfig memCfg = new MemoryControllerConfig();
 		memCfg.setBurstSize(8);
 		memCfg.setMAX4qMode(true);
@@ -32,7 +34,7 @@ public class S_LQCDManager extends CustomManager {
 		config.setOnCardMemoryFrequency(LMemFrequency.MAX4MAIA_800);
 
 		KernelBlock diracKernel = addKernel(
-				new S_LQCDKernel(
+				new LQCDKernel(
 						makeKernelParameters("diracKernel"),
 						T,
 						LX,
@@ -116,7 +118,7 @@ public class S_LQCDManager extends CustomManager {
 		addMaxFileConstant("gCmdSize", engineParameters.getGCmdSize());
 	}
 
-	private void configBuild(S_LQCDEngineParameters params) {
+	private void configBuild(LQCDEngineParameters params) {
 		BuildConfig buildConfig = getBuildConfig();
 		buildConfig.setMPPRCostTableSearchRange(params.getMPPRStartCT(), params.getMPPREndCT());
 		buildConfig.setMPPRParallelism(params.getMPPRThreads());
@@ -124,7 +126,7 @@ public class S_LQCDManager extends CustomManager {
 	}
 
 	public static void main(String[] args) {
-		S_LQCDManager manager = new S_LQCDManager(new S_LQCDEngineParameters(args));
+		LQCDManager manager = new LQCDManager(new LQCDEngineParameters(args));
 		manager.build();
 	}
 }

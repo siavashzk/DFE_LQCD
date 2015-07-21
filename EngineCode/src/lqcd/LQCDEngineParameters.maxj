@@ -1,10 +1,11 @@
-package s_lqcd;
+package lqcd;
 
 import com.maxeler.maxcompiler.v2.build.EngineParameters;
+import com.maxeler.maxcompiler.v2.managers.BuildConfig.Effort;
 
-public class S_LQCDEngineParameters extends EngineParameters {
+public class LQCDEngineParameters extends EngineParameters {
 
-	public S_LQCDEngineParameters(String[] args) {
+	public LQCDEngineParameters(String[] args) {
 		super(args);
 	}
 
@@ -17,23 +18,23 @@ public class S_LQCDEngineParameters extends EngineParameters {
 	private static final String s_volume     = "VOLUME";
 	private static final String s_frequency  = "frequency";
 	private static final String s_effort     = "buildEffort";
-	private static final String s_SpCmdSize  = "spCmdSize";
-	private static final String s_GCmdSize   = "GCmdSize";
+	private static final String s_spCmdSize  = "spCmdSize";
+	private static final String s_gCmdSize   = "GCmdSize";
 
 	@Override
 	protected void declarations() {
-		declareParam(s_T,          DataType.INT, 128);
-		declareParam(s_LZ,         DataType.INT, 16);
-		declareParam(s_LY,         DataType.INT, 16);
-		declareParam(s_LX,         DataType.INT, 32);
-		declareParam(s_numPipes,   DataType.INT, 8);
+		declareParam(s_T,          DataType.INT, 8);
+		declareParam(s_LZ,         DataType.INT, 8);
+		declareParam(s_LY,         DataType.INT, 8);
+		declareParam(s_LX,         DataType.INT, 16);
+		declareParam(s_numPipes,   DataType.INT, 2);
 		declareParam(s_loopOffset, DataType.INT, 16); // should divide LX*LY/2
-		declareParam(s_SpCmdSize,  DataType.INT, 128);  // should divide LX*LY*LZ/2*24*4  /384
-		declareParam(s_GCmdSize,   DataType.INT, 128);  // should divide LX*LY*LZ/2*18*4*8/384
+		declareParam(s_spCmdSize,  DataType.INT, 128);  // should divide LX*LY*LZ/2*24*4  /384
+		declareParam(s_gCmdSize,   DataType.INT, 128);  // should divide LX*LY*LZ/2*18*4*8/384
 		declareParam(s_volume,     DataType.INT, 256);
 
-		//declareParam(s_frequency,  DataType.INT, 100);
-		//declareParam(s_effort,     Effort.class, Effort.HIGH);
+		declareParam(s_frequency,  DataType.INT, 200);
+		declareParam(s_effort,     Effort.class, Effort.HIGH);
 
 	}
 
@@ -77,11 +78,19 @@ public class S_LQCDEngineParameters extends EngineParameters {
 	}
 
 	public int getSpCmdSize(){
-		return getParam(s_SpCmdSize);
+		return getParam(s_spCmdSize);
 	}
 
 	public int getGCmdSize(){
-		return getParam(s_GCmdSize);
+		return getParam(s_gCmdSize);
+	}
+
+	public int getFreq(){
+		return getParam(s_frequency);
+	}
+
+	public int getEffort(){
+		return getParam(s_effort);
 	}
 
 	@Override

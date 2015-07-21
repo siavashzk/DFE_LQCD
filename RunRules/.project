@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>DFE_QPHIX_RunRules</name>
+	<name>DFE_LQCD_RunRules</name>
 	<comment>Simulation</comment>
 	<manageMaxCompiler>false</manageMaxCompiler>
 	<manageMaxGenFD>false</manageMaxGenFD>

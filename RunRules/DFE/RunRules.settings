@@ -8,9 +8,9 @@
 <programArgument argument="MPPRThreads" value="4"/>
 </common>
 <maxFiles>
-<maxFile buildName="S_LQCD" buildOrUseExisting="build">
+<maxFile buildName="LQCD" buildOrUseExisting="build">
 <runConfiguration askBeforeAutoBuild="true">
-<mainClass>s_lqcd.S_LQCDManager</mainClass>
+<mainClass>lqcd.LQCDManager</mainClass>
 <maxHeapSize>2</maxHeapSize>
 </runConfiguration>
 <selectEngineTarget enabled="false">VECTIS</selectEngineTarget>
@@ -19,7 +19,7 @@
 </maxFiles>
 <cpuCode targetType="executable">
 <libraryName/>
-<exeName>S_LQCD</exeName>
+<exeName>LQCD</exeName>
 <skin>
 <ancillaryReleaseInformation enabled="false">
 <dir name=""/>

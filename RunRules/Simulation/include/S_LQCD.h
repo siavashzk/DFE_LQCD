@@ -6,14 +6,14 @@
 extern "C" {
 #endif /* __cplusplus */
 
-#define S_LQCD_LZ (16)
-#define S_LQCD_LY (16)
-#define S_LQCD_LX (32)
-#define S_LQCD_T (128)
+#define S_LQCD_LZ (8)
+#define S_LQCD_LY (8)
+#define S_LQCD_LX (16)
+#define S_LQCD_T (8)
 #define S_LQCD_gCmdSize (128)
 #define S_LQCD_spCmdSize (128)
 #define S_LQCD_loopOffset (16)
-#define S_LQCD_numPipes (8)
+#define S_LQCD_numPipes (2)
 #define S_LQCD_PCIE_ALIGNMENT (16)
 
 
