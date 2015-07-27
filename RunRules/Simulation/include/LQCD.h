@@ -28,11 +28,10 @@ extern "C" {
  * \brief Basic static function for the interface 'default'.
  * 
  * \param [in] ticks_diracKernel The number of ticks for which kernel "diracKernel" will run.
- * \param [in] ticks_gReadCmdKernel The number of ticks for which kernel "gReadCmdKernel" will run.
- * \param [in] ticks_gWriteCmdKernel The number of ticks for which kernel "gWriteCmdKernel" will run.
- * \param [in] ticks_spReadCmdKernel0 The number of ticks for which kernel "spReadCmdKernel0" will run.
- * \param [in] ticks_spReadCmdKernel1 The number of ticks for which kernel "spReadCmdKernel1" will run.
- * \param [in] ticks_spWriteCmdKernel The number of ticks for which kernel "spWriteCmdKernel" will run.
+ * \param [in] ticks_readCmdKernel0 The number of ticks for which kernel "readCmdKernel0" will run.
+ * \param [in] ticks_readCmdKernel1 The number of ticks for which kernel "readCmdKernel1" will run.
+ * \param [in] ticks_readCmdKernel2 The number of ticks for which kernel "readCmdKernel2" will run.
+ * \param [in] ticks_writeCmdKernel The number of ticks for which kernel "writeCmdKernel" will run.
  * \param [in] inscalar_diracKernel_alpha Input scalar parameter "diracKernel.alpha".
  * \param [in] inscalar_diracKernel_beta_s Input scalar parameter "diracKernel.beta_s".
  * \param [in] inscalar_diracKernel_beta_t_b Input scalar parameter "diracKernel.beta_t_b".
@@ -40,29 +39,34 @@ extern "C" {
  * \param [in] inscalar_diracKernel_doSub Input scalar parameter "diracKernel.doSub".
  * \param [in] inscalar_diracKernel_ieo Input scalar parameter "diracKernel.ieo".
  * \param [in] inscalar_diracKernel_isign Input scalar parameter "diracKernel.isign".
- * \param [in] inscalar_gReadCmdKernel_startAddress Input scalar parameter "gReadCmdKernel.startAddress".
- * \param [in] inscalar_gWriteCmdKernel_startAddress Input scalar parameter "gWriteCmdKernel.startAddress".
- * \param [in] inscalar_spReadCmdKernel0_halos Input scalar parameter "spReadCmdKernel0.halos".
- * \param [in] inscalar_spReadCmdKernel0_startAddress Input scalar parameter "spReadCmdKernel0.startAddress".
- * \param [in] inscalar_spReadCmdKernel1_halos Input scalar parameter "spReadCmdKernel1.halos".
- * \param [in] inscalar_spReadCmdKernel1_startAddress Input scalar parameter "spReadCmdKernel1.startAddress".
- * \param [in] inscalar_spWriteCmdKernel_halos Input scalar parameter "spWriteCmdKernel.halos".
- * \param [in] inscalar_spWriteCmdKernel_startAddress Input scalar parameter "spWriteCmdKernel.startAddress".
- * \param [in] instream_gauge_in Stream "gauge_in".
- * \param [in] instream_size_gauge_in The size of the stream instream_gauge_in in bytes.
- * \param [in] instream_spinor_in Stream "spinor_in".
- * \param [in] instream_size_spinor_in The size of the stream instream_spinor_in in bytes.
- * \param [out] outstream_spinor_out Stream "spinor_out".
- * \param [in] outstream_size_spinor_out The size of the stream outstream_spinor_out in bytes.
+ * \param [in] inscalar_readCmdKernel0_burstsPerTSlice Input scalar parameter "readCmdKernel0.burstsPerTSlice".
+ * \param [in] inscalar_readCmdKernel0_cmdSize Input scalar parameter "readCmdKernel0.cmdSize".
+ * \param [in] inscalar_readCmdKernel0_halos Input scalar parameter "readCmdKernel0.halos".
+ * \param [in] inscalar_readCmdKernel0_startAddress Input scalar parameter "readCmdKernel0.startAddress".
+ * \param [in] inscalar_readCmdKernel1_burstsPerTSlice Input scalar parameter "readCmdKernel1.burstsPerTSlice".
+ * \param [in] inscalar_readCmdKernel1_cmdSize Input scalar parameter "readCmdKernel1.cmdSize".
+ * \param [in] inscalar_readCmdKernel1_halos Input scalar parameter "readCmdKernel1.halos".
+ * \param [in] inscalar_readCmdKernel1_startAddress Input scalar parameter "readCmdKernel1.startAddress".
+ * \param [in] inscalar_readCmdKernel2_burstsPerTSlice Input scalar parameter "readCmdKernel2.burstsPerTSlice".
+ * \param [in] inscalar_readCmdKernel2_cmdSize Input scalar parameter "readCmdKernel2.cmdSize".
+ * \param [in] inscalar_readCmdKernel2_halos Input scalar parameter "readCmdKernel2.halos".
+ * \param [in] inscalar_readCmdKernel2_startAddress Input scalar parameter "readCmdKernel2.startAddress".
+ * \param [in] inscalar_writeCmdKernel_burstsPerTSlice Input scalar parameter "writeCmdKernel.burstsPerTSlice".
+ * \param [in] inscalar_writeCmdKernel_cmdSize Input scalar parameter "writeCmdKernel.cmdSize".
+ * \param [in] inscalar_writeCmdKernel_halos Input scalar parameter "writeCmdKernel.halos".
+ * \param [in] inscalar_writeCmdKernel_startAddress Input scalar parameter "writeCmdKernel.startAddress".
+ * \param [in] instream_data_in Stream "data_in".
+ * \param [in] instream_size_data_in The size of the stream instream_data_in in bytes.
+ * \param [out] outstream_data_out Stream "data_out".
+ * \param [in] outstream_size_data_out The size of the stream outstream_data_out in bytes.
  * \param [in] routing_string A string containing comma-separated "from_name -> to_name" routing commands.
  */
 void LQCD(
 	uint64_t ticks_diracKernel,
-	uint64_t ticks_gReadCmdKernel,
-	uint64_t ticks_gWriteCmdKernel,
-	uint64_t ticks_spReadCmdKernel0,
-	uint64_t ticks_spReadCmdKernel1,
-	uint64_t ticks_spWriteCmdKernel,
+	uint64_t ticks_readCmdKernel0,
+	uint64_t ticks_readCmdKernel1,
+	uint64_t ticks_readCmdKernel2,
+	uint64_t ticks_writeCmdKernel,
 	double inscalar_diracKernel_alpha,
 	double inscalar_diracKernel_beta_s,
 	double inscalar_diracKernel_beta_t_b,
@@ -70,20 +74,26 @@ void LQCD(
 	uint64_t inscalar_diracKernel_doSub,
 	uint64_t inscalar_diracKernel_ieo,
 	uint64_t inscalar_diracKernel_isign,
-	uint64_t inscalar_gReadCmdKernel_startAddress,
-	uint64_t inscalar_gWriteCmdKernel_startAddress,
-	uint64_t inscalar_spReadCmdKernel0_halos,
-	uint64_t inscalar_spReadCmdKernel0_startAddress,
-	uint64_t inscalar_spReadCmdKernel1_halos,
-	uint64_t inscalar_spReadCmdKernel1_startAddress,
-	uint64_t inscalar_spWriteCmdKernel_halos,
-	uint64_t inscalar_spWriteCmdKernel_startAddress,
-	const void *instream_gauge_in,
-	size_t instream_size_gauge_in,
-	const void *instream_spinor_in,
-	size_t instream_size_spinor_in,
-	void *outstream_spinor_out,
-	size_t outstream_size_spinor_out,
+	uint64_t inscalar_readCmdKernel0_burstsPerTSlice,
+	uint64_t inscalar_readCmdKernel0_cmdSize,
+	uint64_t inscalar_readCmdKernel0_halos,
+	uint64_t inscalar_readCmdKernel0_startAddress,
+	uint64_t inscalar_readCmdKernel1_burstsPerTSlice,
+	uint64_t inscalar_readCmdKernel1_cmdSize,
+	uint64_t inscalar_readCmdKernel1_halos,
+	uint64_t inscalar_readCmdKernel1_startAddress,
+	uint64_t inscalar_readCmdKernel2_burstsPerTSlice,
+	uint64_t inscalar_readCmdKernel2_cmdSize,
+	uint64_t inscalar_readCmdKernel2_halos,
+	uint64_t inscalar_readCmdKernel2_startAddress,
+	uint64_t inscalar_writeCmdKernel_burstsPerTSlice,
+	uint64_t inscalar_writeCmdKernel_cmdSize,
+	uint64_t inscalar_writeCmdKernel_halos,
+	uint64_t inscalar_writeCmdKernel_startAddress,
+	const void *instream_data_in,
+	size_t instream_size_data_in,
+	void *outstream_data_out,
+	size_t outstream_size_data_out,
 	const char * routing_string);
 
 /**
@@ -95,11 +105,10 @@ void LQCD(
  * 
  * 
  * \param [in] ticks_diracKernel The number of ticks for which kernel "diracKernel" will run.
- * \param [in] ticks_gReadCmdKernel The number of ticks for which kernel "gReadCmdKernel" will run.
- * \param [in] ticks_gWriteCmdKernel The number of ticks for which kernel "gWriteCmdKernel" will run.
- * \param [in] ticks_spReadCmdKernel0 The number of ticks for which kernel "spReadCmdKernel0" will run.
- * \param [in] ticks_spReadCmdKernel1 The number of ticks for which kernel "spReadCmdKernel1" will run.
- * \param [in] ticks_spWriteCmdKernel The number of ticks for which kernel "spWriteCmdKernel" will run.
+ * \param [in] ticks_readCmdKernel0 The number of ticks for which kernel "readCmdKernel0" will run.
+ * \param [in] ticks_readCmdKernel1 The number of ticks for which kernel "readCmdKernel1" will run.
+ * \param [in] ticks_readCmdKernel2 The number of ticks for which kernel "readCmdKernel2" will run.
+ * \param [in] ticks_writeCmdKernel The number of ticks for which kernel "writeCmdKernel" will run.
  * \param [in] inscalar_diracKernel_alpha Input scalar parameter "diracKernel.alpha".
  * \param [in] inscalar_diracKernel_beta_s Input scalar parameter "diracKernel.beta_s".
  * \param [in] inscalar_diracKernel_beta_t_b Input scalar parameter "diracKernel.beta_t_b".
@@ -107,30 +116,35 @@ void LQCD(
  * \param [in] inscalar_diracKernel_doSub Input scalar parameter "diracKernel.doSub".
  * \param [in] inscalar_diracKernel_ieo Input scalar parameter "diracKernel.ieo".
  * \param [in] inscalar_diracKernel_isign Input scalar parameter "diracKernel.isign".
- * \param [in] inscalar_gReadCmdKernel_startAddress Input scalar parameter "gReadCmdKernel.startAddress".
- * \param [in] inscalar_gWriteCmdKernel_startAddress Input scalar parameter "gWriteCmdKernel.startAddress".
- * \param [in] inscalar_spReadCmdKernel0_halos Input scalar parameter "spReadCmdKernel0.halos".
- * \param [in] inscalar_spReadCmdKernel0_startAddress Input scalar parameter "spReadCmdKernel0.startAddress".
- * \param [in] inscalar_spReadCmdKernel1_halos Input scalar parameter "spReadCmdKernel1.halos".
- * \param [in] inscalar_spReadCmdKernel1_startAddress Input scalar parameter "spReadCmdKernel1.startAddress".
- * \param [in] inscalar_spWriteCmdKernel_halos Input scalar parameter "spWriteCmdKernel.halos".
- * \param [in] inscalar_spWriteCmdKernel_startAddress Input scalar parameter "spWriteCmdKernel.startAddress".
- * \param [in] instream_gauge_in Stream "gauge_in".
- * \param [in] instream_size_gauge_in The size of the stream instream_gauge_in in bytes.
- * \param [in] instream_spinor_in Stream "spinor_in".
- * \param [in] instream_size_spinor_in The size of the stream instream_spinor_in in bytes.
- * \param [out] outstream_spinor_out Stream "spinor_out".
- * \param [in] outstream_size_spinor_out The size of the stream outstream_spinor_out in bytes.
+ * \param [in] inscalar_readCmdKernel0_burstsPerTSlice Input scalar parameter "readCmdKernel0.burstsPerTSlice".
+ * \param [in] inscalar_readCmdKernel0_cmdSize Input scalar parameter "readCmdKernel0.cmdSize".
+ * \param [in] inscalar_readCmdKernel0_halos Input scalar parameter "readCmdKernel0.halos".
+ * \param [in] inscalar_readCmdKernel0_startAddress Input scalar parameter "readCmdKernel0.startAddress".
+ * \param [in] inscalar_readCmdKernel1_burstsPerTSlice Input scalar parameter "readCmdKernel1.burstsPerTSlice".
+ * \param [in] inscalar_readCmdKernel1_cmdSize Input scalar parameter "readCmdKernel1.cmdSize".
+ * \param [in] inscalar_readCmdKernel1_halos Input scalar parameter "readCmdKernel1.halos".
+ * \param [in] inscalar_readCmdKernel1_startAddress Input scalar parameter "readCmdKernel1.startAddress".
+ * \param [in] inscalar_readCmdKernel2_burstsPerTSlice Input scalar parameter "readCmdKernel2.burstsPerTSlice".
+ * \param [in] inscalar_readCmdKernel2_cmdSize Input scalar parameter "readCmdKernel2.cmdSize".
+ * \param [in] inscalar_readCmdKernel2_halos Input scalar parameter "readCmdKernel2.halos".
+ * \param [in] inscalar_readCmdKernel2_startAddress Input scalar parameter "readCmdKernel2.startAddress".
+ * \param [in] inscalar_writeCmdKernel_burstsPerTSlice Input scalar parameter "writeCmdKernel.burstsPerTSlice".
+ * \param [in] inscalar_writeCmdKernel_cmdSize Input scalar parameter "writeCmdKernel.cmdSize".
+ * \param [in] inscalar_writeCmdKernel_halos Input scalar parameter "writeCmdKernel.halos".
+ * \param [in] inscalar_writeCmdKernel_startAddress Input scalar parameter "writeCmdKernel.startAddress".
+ * \param [in] instream_data_in Stream "data_in".
+ * \param [in] instream_size_data_in The size of the stream instream_data_in in bytes.
+ * \param [out] outstream_data_out Stream "data_out".
+ * \param [in] outstream_size_data_out The size of the stream outstream_data_out in bytes.
  * \param [in] routing_string A string containing comma-separated "from_name -> to_name" routing commands.
  * \return A handle on the execution status, or NULL in case of error.
  */
 max_run_t *LQCD_nonblock(
 	uint64_t ticks_diracKernel,
-	uint64_t ticks_gReadCmdKernel,
-	uint64_t ticks_gWriteCmdKernel,
-	uint64_t ticks_spReadCmdKernel0,
-	uint64_t ticks_spReadCmdKernel1,
-	uint64_t ticks_spWriteCmdKernel,
+	uint64_t ticks_readCmdKernel0,
+	uint64_t ticks_readCmdKernel1,
+	uint64_t ticks_readCmdKernel2,
+	uint64_t ticks_writeCmdKernel,
 	double inscalar_diracKernel_alpha,
 	double inscalar_diracKernel_beta_s,
 	double inscalar_diracKernel_beta_t_b,
@@ -138,20 +152,26 @@ max_run_t *LQCD_nonblock(
 	uint64_t inscalar_diracKernel_doSub,
 	uint64_t inscalar_diracKernel_ieo,
 	uint64_t inscalar_diracKernel_isign,
-	uint64_t inscalar_gReadCmdKernel_startAddress,
-	uint64_t inscalar_gWriteCmdKernel_startAddress,
-	uint64_t inscalar_spReadCmdKernel0_halos,
-	uint64_t inscalar_spReadCmdKernel0_startAddress,
-	uint64_t inscalar_spReadCmdKernel1_halos,
-	uint64_t inscalar_spReadCmdKernel1_startAddress,
-	uint64_t inscalar_spWriteCmdKernel_halos,
-	uint64_t inscalar_spWriteCmdKernel_startAddress,
-	const void *instream_gauge_in,
-	size_t instream_size_gauge_in,
-	const void *instream_spinor_in,
-	size_t instream_size_spinor_in,
-	void *outstream_spinor_out,
-	size_t outstream_size_spinor_out,
+	uint64_t inscalar_readCmdKernel0_burstsPerTSlice,
+	uint64_t inscalar_readCmdKernel0_cmdSize,
+	uint64_t inscalar_readCmdKernel0_halos,
+	uint64_t inscalar_readCmdKernel0_startAddress,
+	uint64_t inscalar_readCmdKernel1_burstsPerTSlice,
+	uint64_t inscalar_readCmdKernel1_cmdSize,
+	uint64_t inscalar_readCmdKernel1_halos,
+	uint64_t inscalar_readCmdKernel1_startAddress,
+	uint64_t inscalar_readCmdKernel2_burstsPerTSlice,
+	uint64_t inscalar_readCmdKernel2_cmdSize,
+	uint64_t inscalar_readCmdKernel2_halos,
+	uint64_t inscalar_readCmdKernel2_startAddress,
+	uint64_t inscalar_writeCmdKernel_burstsPerTSlice,
+	uint64_t inscalar_writeCmdKernel_cmdSize,
+	uint64_t inscalar_writeCmdKernel_halos,
+	uint64_t inscalar_writeCmdKernel_startAddress,
+	const void *instream_data_in,
+	size_t instream_size_data_in,
+	void *outstream_data_out,
+	size_t outstream_size_data_out,
 	const char * routing_string);
 
 /**
@@ -160,11 +180,10 @@ max_run_t *LQCD_nonblock(
  */
 typedef struct { 
 	uint64_t ticks_diracKernel; /**<  [in] The number of ticks for which kernel "diracKernel" will run. */
-	uint64_t ticks_gReadCmdKernel; /**<  [in] The number of ticks for which kernel "gReadCmdKernel" will run. */
-	uint64_t ticks_gWriteCmdKernel; /**<  [in] The number of ticks for which kernel "gWriteCmdKernel" will run. */
-	uint64_t ticks_spReadCmdKernel0; /**<  [in] The number of ticks for which kernel "spReadCmdKernel0" will run. */
-	uint64_t ticks_spReadCmdKernel1; /**<  [in] The number of ticks for which kernel "spReadCmdKernel1" will run. */
-	uint64_t ticks_spWriteCmdKernel; /**<  [in] The number of ticks for which kernel "spWriteCmdKernel" will run. */
+	uint64_t ticks_readCmdKernel0; /**<  [in] The number of ticks for which kernel "readCmdKernel0" will run. */
+	uint64_t ticks_readCmdKernel1; /**<  [in] The number of ticks for which kernel "readCmdKernel1" will run. */
+	uint64_t ticks_readCmdKernel2; /**<  [in] The number of ticks for which kernel "readCmdKernel2" will run. */
+	uint64_t ticks_writeCmdKernel; /**<  [in] The number of ticks for which kernel "writeCmdKernel" will run. */
 	double inscalar_diracKernel_alpha; /**<  [in] Input scalar parameter "diracKernel.alpha". */
 	double inscalar_diracKernel_beta_s; /**<  [in] Input scalar parameter "diracKernel.beta_s". */
 	double inscalar_diracKernel_beta_t_b; /**<  [in] Input scalar parameter "diracKernel.beta_t_b". */
@@ -172,20 +191,26 @@ typedef struct {
 	uint64_t inscalar_diracKernel_doSub; /**<  [in] Input scalar parameter "diracKernel.doSub". */
 	uint64_t inscalar_diracKernel_ieo; /**<  [in] Input scalar parameter "diracKernel.ieo". */
 	uint64_t inscalar_diracKernel_isign; /**<  [in] Input scalar parameter "diracKernel.isign". */
-	uint64_t inscalar_gReadCmdKernel_startAddress; /**<  [in] Input scalar parameter "gReadCmdKernel.startAddress". */
-	uint64_t inscalar_gWriteCmdKernel_startAddress; /**<  [in] Input scalar parameter "gWriteCmdKernel.startAddress". */
-	uint64_t inscalar_spReadCmdKernel0_halos; /**<  [in] Input scalar parameter "spReadCmdKernel0.halos". */
-	uint64_t inscalar_spReadCmdKernel0_startAddress; /**<  [in] Input scalar parameter "spReadCmdKernel0.startAddress". */
-	uint64_t inscalar_spReadCmdKernel1_halos; /**<  [in] Input scalar parameter "spReadCmdKernel1.halos". */
-	uint64_t inscalar_spReadCmdKernel1_startAddress; /**<  [in] Input scalar parameter "spReadCmdKernel1.startAddress". */
-	uint64_t inscalar_spWriteCmdKernel_halos; /**<  [in] Input scalar parameter "spWriteCmdKernel.halos". */
-	uint64_t inscalar_spWriteCmdKernel_startAddress; /**<  [in] Input scalar parameter "spWriteCmdKernel.startAddress". */
-	const void *instream_gauge_in; /**<  [in] Stream "gauge_in". */
-	size_t instream_size_gauge_in; /**<  [in] The size of the stream instream_gauge_in in bytes. */
-	const void *instream_spinor_in; /**<  [in] Stream "spinor_in". */
-	size_t instream_size_spinor_in; /**<  [in] The size of the stream instream_spinor_in in bytes. */
-	void *outstream_spinor_out; /**<  [out] Stream "spinor_out". */
-	size_t outstream_size_spinor_out; /**<  [in] The size of the stream outstream_spinor_out in bytes. */
+	uint64_t inscalar_readCmdKernel0_burstsPerTSlice; /**<  [in] Input scalar parameter "readCmdKernel0.burstsPerTSlice". */
+	uint64_t inscalar_readCmdKernel0_cmdSize; /**<  [in] Input scalar parameter "readCmdKernel0.cmdSize". */
+	uint64_t inscalar_readCmdKernel0_halos; /**<  [in] Input scalar parameter "readCmdKernel0.halos". */
+	uint64_t inscalar_readCmdKernel0_startAddress; /**<  [in] Input scalar parameter "readCmdKernel0.startAddress". */
+	uint64_t inscalar_readCmdKernel1_burstsPerTSlice; /**<  [in] Input scalar parameter "readCmdKernel1.burstsPerTSlice". */
+	uint64_t inscalar_readCmdKernel1_cmdSize; /**<  [in] Input scalar parameter "readCmdKernel1.cmdSize". */
+	uint64_t inscalar_readCmdKernel1_halos; /**<  [in] Input scalar parameter "readCmdKernel1.halos". */
+	uint64_t inscalar_readCmdKernel1_startAddress; /**<  [in] Input scalar parameter "readCmdKernel1.startAddress". */
+	uint64_t inscalar_readCmdKernel2_burstsPerTSlice; /**<  [in] Input scalar parameter "readCmdKernel2.burstsPerTSlice". */
+	uint64_t inscalar_readCmdKernel2_cmdSize; /**<  [in] Input scalar parameter "readCmdKernel2.cmdSize". */
+	uint64_t inscalar_readCmdKernel2_halos; /**<  [in] Input scalar parameter "readCmdKernel2.halos". */
+	uint64_t inscalar_readCmdKernel2_startAddress; /**<  [in] Input scalar parameter "readCmdKernel2.startAddress". */
+	uint64_t inscalar_writeCmdKernel_burstsPerTSlice; /**<  [in] Input scalar parameter "writeCmdKernel.burstsPerTSlice". */
+	uint64_t inscalar_writeCmdKernel_cmdSize; /**<  [in] Input scalar parameter "writeCmdKernel.cmdSize". */
+	uint64_t inscalar_writeCmdKernel_halos; /**<  [in] Input scalar parameter "writeCmdKernel.halos". */
+	uint64_t inscalar_writeCmdKernel_startAddress; /**<  [in] Input scalar parameter "writeCmdKernel.startAddress". */
+	const void *instream_data_in; /**<  [in] Stream "data_in". */
+	size_t instream_size_data_in; /**<  [in] The size of the stream instream_data_in in bytes. */
+	void *outstream_data_out; /**<  [out] Stream "data_out". */
+	size_t outstream_size_data_out; /**<  [in] The size of the stream outstream_data_out in bytes. */
 	const char * routing_string; /**<  [in] A string containing comma-separated "from_name -> to_name" routing commands. */
 } LQCD_actions_t;
 

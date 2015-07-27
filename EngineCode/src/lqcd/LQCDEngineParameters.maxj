@@ -15,7 +15,6 @@ public class LQCDEngineParameters extends EngineParameters {
 	private static final String s_T          = "T";
 	private static final String s_numPipes   = "P";
 	private static final String s_loopOffset = "LOOP_OFFSET";
-	private static final String s_volume     = "VOLUME";
 	private static final String s_frequency  = "frequency";
 	private static final String s_effort     = "buildEffort";
 	private static final String s_spCmdSize  = "spCmdSize";
@@ -31,7 +30,6 @@ public class LQCDEngineParameters extends EngineParameters {
 		declareParam(s_loopOffset, DataType.INT, 16); // should divide LX*LY/2
 		declareParam(s_spCmdSize,  DataType.INT, 128);  // should divide LX*LY*LZ/2*24*4  /384
 		declareParam(s_gCmdSize,   DataType.INT, 128);  // should divide LX*LY*LZ/2*18*4*8/384
-		declareParam(s_volume,     DataType.INT, 0);
 
 		declareParam(s_frequency,  DataType.INT, 130);
 		declareParam(s_effort,     Effort.class, Effort.HIGH);
@@ -40,7 +38,7 @@ public class LQCDEngineParameters extends EngineParameters {
 
 	@Override
 	protected void deriveParameters() {
-		deriveParam(s_volume, getLX() * getLY() * getLZ() * getT() );
+//		deriveParam(s_volume, getLX() * getLY() * getLZ() * getT() );
 	}
 //
 //	@Override
@@ -71,10 +69,6 @@ public class LQCDEngineParameters extends EngineParameters {
 
 	public int getLoopOffset(){
 		return getParam(s_loopOffset);
-	}
-
-	public int getVolume(){
-		return getParam(s_volume);
 	}
 
 	public int getSpCmdSize(){

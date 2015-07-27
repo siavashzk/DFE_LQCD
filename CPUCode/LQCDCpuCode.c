@@ -43,7 +43,7 @@ void reorganize_gauge(su3 const * const in, su3 * const out, int ieo);
 
 static max_file_t *maxfile;
 static max_engine_t *engine;
-static int burstsPerGaugeT, burstsPerSpinorT;
+static int burstsPerGaugeTimeSlice, burstsPerSpinorTimeSlice;
 static double beta_s, beta_t_b, beta_t_f, mass;
 static double elapsedTime;
 
@@ -118,11 +118,11 @@ int main(void) {
 	init_dfe();
 
 	int address_g0  = 0;
-	int address_g1  = T * burstsPerGaugeT;
-	int address_p   = 2 * T * burstsPerGaugeT;
-	int address_mp  = 2 * T * burstsPerGaugeT + T * burstsPerSpinorT;
-	int address_mmp = 2 * T * burstsPerGaugeT + 2 * T * burstsPerSpinorT;
-	int address_tmp = 2 * T * burstsPerGaugeT + 3 * T * burstsPerSpinorT;
+	int address_g1  = T * burstsPerGaugeTimeSlice;
+	int address_p   = 2 * T * burstsPerGaugeTimeSlice;
+	int address_mp  = 2 * T * burstsPerGaugeTimeSlice + T * burstsPerSpinorTimeSlice;
+	int address_mmp = 2 * T * burstsPerGaugeTimeSlice + 2 * T * burstsPerSpinorTimeSlice;
+	int address_tmp = 2 * T * burstsPerGaugeTimeSlice + 3 * T * burstsPerSpinorTimeSlice;
 
 	printf("Transferring Gauge to Memory  ...");
 	transfer_gauges_to_dfe(u0_re, address_g0);
@@ -165,24 +165,26 @@ void init_dfe(void) {
 	maxfile = LQCD_init();
 	engine = max_load(maxfile, "*");
 	int burstSize = max_get_burst_size(maxfile, 0);
-	burstsPerGaugeT  = (LX*LY*LZ/2*8*sizeof(su3)) / burstSize;
-	burstsPerSpinorT = (LX*LY*LZ/2*sizeof(spinor)) / burstSize;
+	burstsPerGaugeTimeSlice  = (LX*LY*LZ/2*8*sizeof(su3)) / burstSize;
+	burstsPerSpinorTimeSlice = (LX*LY*LZ/2*sizeof(spinor)) / burstSize;
+
 }
 
 void transfer_spinors_to_dfe (spinor *in, int address) {
 	max_actions_t *act = max_actions_init(maxfile, 0);
-	max_queue_input(act, "spinor_in", in, VOLUME/2 * sizeof(spinor));
-	max_set_ticks(act, "spWriteCmdKernel", T*burstsPerSpinorT/LQCD_spCmdSize);
-	max_set_uint64t(act, "spWriteCmdKernel", "startAddress", address);
-	max_set_uint64t(act, "spWriteCmdKernel", "halos", 0);
-    max_route(act, "sptoLmemMux_fromCPU", "sptoLmemMux");
-    max_lmem_set_interrupt_on(act, "sptoLmem");
+	max_queue_input(act, "data_in", in, VOLUME/2 * sizeof(spinor));
+	max_set_ticks(act, "writeCmdKernel", T*burstsPerSpinorTimeSlice/LQCD_spCmdSize);
+	max_set_uint64t(act, "writeCmdKernel", "startAddress", address);
+	max_set_uint64t(act, "writeCmdKernel", "halos", 0);
+	max_set_uint64t(act, "writeCmdKernel", "cmdSize", LQCD_spCmdSize);
+	max_set_uint64t(act, "writeCmdKernel", "burstsPerTSlice", burstsPerSpinorTimeSlice/LQCD_spCmdSize);
+    max_route(act, "toLmemMux_fromCPU", "toLmemMux");
+    max_lmem_set_interrupt_on(act, "toLmem");
 
 	max_ignore_kernel(act, "diracKernel");
-	max_ignore_kernel(act, "gReadCmdKernel");
-	max_ignore_kernel(act, "gWriteCmdKernel");
-	max_ignore_kernel(act, "spReadCmdKernel0");
-	max_ignore_kernel(act, "spReadCmdKernel1");
+	max_ignore_kernel(act, "readCmdKernel0");
+	max_ignore_kernel(act, "readCmdKernel1");
+	max_ignore_kernel(act, "readCmdKernel2");
     max_ignore_route(act, "spfromLmem0Demux");
 
 	max_run(engine, act);
@@ -191,18 +193,20 @@ void transfer_spinors_to_dfe (spinor *in, int address) {
 
 void transfer_gauges_to_dfe (su3 *in, int address) {
 	max_actions_t *act = max_actions_init(maxfile, 0);
-	max_queue_input(act, "gauge_in", in, VOLUME/2 * 8 * sizeof(su3));
-	max_set_ticks(act, "gWriteCmdKernel", T*burstsPerGaugeT/LQCD_gCmdSize);
-	max_set_uint64t(act, "gWriteCmdKernel", "startAddress", address);
-	max_lmem_set_interrupt_on(act, "gtoLmem");
+	max_queue_input(act, "data_in", in, VOLUME/2 * 8 * sizeof(su3));
+	max_set_ticks(act, "writeCmdKernel", T*burstsPerGaugeTimeSlice/LQCD_gCmdSize);
+	max_set_uint64t(act, "writeCmdKernel", "startAddress", address);
+	max_set_uint64t(act, "writeCmdKernel", "halos", 0);
+	max_set_uint64t(act, "writeCmdKernel", "cmdSize", LQCD_gCmdSize);
+	max_set_uint64t(act, "writeCmdKernel", "burstsPerTSlice", burstsPerGaugeTimeSlice/LQCD_gCmdSize);
+    max_route(act, "toLmemMux_fromCPU", "toLmemMux");
+	max_lmem_set_interrupt_on(act, "toLmem");
 
 	max_ignore_kernel(act, "diracKernel");
-	max_ignore_kernel(act, "gReadCmdKernel");
-	max_ignore_kernel(act, "spWriteCmdKernel");
-	max_ignore_kernel(act, "spReadCmdKernel0");
-	max_ignore_kernel(act, "spReadCmdKernel1");
-	max_ignore_route(act, "sptoLmemMux");
-	max_ignore_route(act, "spfromLmem0Demux");
+	max_ignore_kernel(act, "readCmdKernel0");
+	max_ignore_kernel(act, "readCmdKernel1");
+	max_ignore_kernel(act, "readCmdKernel2");
+    max_ignore_route(act, "spfromLmem0Demux");
 
 	max_run(engine, act);
 	max_actions_free(act);
@@ -227,26 +231,40 @@ void apply_dirac (int in_address, int out_address, int gauge_address, int p_addr
 		max_set_double(act, "diracKernel", "beta_t_f", beta_t_f / (16+4*mass));
 	}
 	max_set_ticks(act, "diracKernel", 16/NUM_PIPES * ( (T+2)*LX*LY*LZ/2 +  LOOP_OFFSET) + 2 );
-	max_set_ticks(act, "gReadCmdKernel", (T+2)*burstsPerGaugeT/LQCD_gCmdSize);
-	max_set_uint64t(act, "gReadCmdKernel", "startAddress", gauge_address);
-	max_set_ticks(act, "spReadCmdKernel0", (T+2)*burstsPerSpinorT/LQCD_spCmdSize);
-	max_set_uint64t(act, "spReadCmdKernel0", "startAddress", in_address);
-	max_set_uint64t(act, "spReadCmdKernel0", "halos", 1);
-	if (doSub == 0) {
-		max_ignore_kernel(act, "spReadCmdKernel1");
-	} else  {
-		max_set_ticks(act, "spReadCmdKernel1", (T)*burstsPerSpinorT/LQCD_spCmdSize);
-		max_set_uint64t(act, "spReadCmdKernel1", "startAddress", p_address);
-		max_set_uint64t(act, "spReadCmdKernel1", "halos", 0);
-	}
-	max_set_ticks(act, "spWriteCmdKernel", T*burstsPerSpinorT/LQCD_spCmdSize);
-	max_set_uint64t(act, "spWriteCmdKernel", "startAddress", out_address);
-	max_set_uint64t(act, "spWriteCmdKernel", "halos", 0);
-	max_route(act, "sptoLmemMux_fromKernel", "sptoLmemMux");
-	max_route(act, "spfromLmem0Demux", "spfromLmem0Demux_toKernel");
-	max_lmem_set_interrupt_on(act, "sptoLmem");
 
-	max_ignore_kernel(act, "gWriteCmdKernel");
+
+	max_set_ticks(act, "readCmdKernel0", (T+2)*burstsPerGaugeTimeSlice/LQCD_gCmdSize);
+	max_set_uint64t(act, "readCmdKernel0", "startAddress", gauge_address);
+	max_set_uint64t(act, "readCmdKernel0", "halos", 1);
+	max_set_uint64t(act, "readCmdKernel0", "cmdSize", LQCD_gCmdSize);
+	max_set_uint64t(act, "readCmdKernel0", "burstsPerTSlice", burstsPerGaugeTimeSlice/LQCD_gCmdSize);
+
+
+	max_set_ticks(act, "readCmdKernel1", (T+2)*burstsPerSpinorTimeSlice/LQCD_spCmdSize);
+	max_set_uint64t(act, "readCmdKernel1", "startAddress", in_address);
+	max_set_uint64t(act, "readCmdKernel1", "halos", 1);
+	max_set_uint64t(act, "readCmdKernel1", "cmdSize", LQCD_spCmdSize);
+	max_set_uint64t(act, "readCmdKernel1", "burstsPerTSlice", burstsPerSpinorTimeSlice/LQCD_spCmdSize);
+
+	if (doSub == 0) {
+		max_ignore_kernel(act, "readCmdKernel2");
+	} else  {
+		max_set_ticks(act, "readCmdKernel2", (T)*burstsPerSpinorTimeSlice/LQCD_spCmdSize);
+		max_set_uint64t(act, "readCmdKernel2", "startAddress", p_address);
+		max_set_uint64t(act, "readCmdKernel2", "halos", 0);
+		max_set_uint64t(act, "readCmdKernel2", "cmdSize", LQCD_spCmdSize);
+		max_set_uint64t(act, "readCmdKernel2", "burstsPerTSlice", burstsPerSpinorTimeSlice/LQCD_spCmdSize);
+	}
+
+	max_set_ticks(act, "writeCmdKernel", T*burstsPerSpinorTimeSlice/LQCD_spCmdSize);
+	max_set_uint64t(act, "writeCmdKernel", "startAddress", out_address);
+	max_set_uint64t(act, "writeCmdKernel", "halos", 0);
+	max_set_uint64t(act, "writeCmdKernel", "cmdSize", LQCD_spCmdSize);
+	max_set_uint64t(act, "writeCmdKernel", "burstsPerTSlice", burstsPerSpinorTimeSlice/LQCD_spCmdSize);
+
+	max_route(act, "toLmemMux_fromKernel", "toLmemMux");
+	max_route(act, "spfromLmem0Demux", "spfromLmem0Demux_toKernel");
+	max_lmem_set_interrupt_on(act, "toLmem");
 
 	struct timeval start_time, end_time;
 
@@ -261,18 +279,21 @@ void apply_dirac (int in_address, int out_address, int gauge_address, int p_addr
 
 void transfer_spinors_to_cpu (spinor *out, int address) {
 	max_actions_t *act = max_actions_init(maxfile, 0);
-	max_queue_output(act, "spinor_out", out,  VOLUME/2 * sizeof(spinor));
-	max_set_ticks(act, "spReadCmdKernel0", T*burstsPerSpinorT/LQCD_gCmdSize);
-	max_set_uint64t(act, "spReadCmdKernel0", "startAddress", address);
-	max_set_uint64t(act, "spReadCmdKernel0", "halos", 0);
+	max_queue_output(act, "data_out", out,  VOLUME/2 * sizeof(spinor));
+
+	max_set_ticks(act, "readCmdKernel1", (T)*burstsPerSpinorTimeSlice/LQCD_spCmdSize);
+	max_set_uint64t(act, "readCmdKernel1", "startAddress", address);
+	max_set_uint64t(act, "readCmdKernel1", "halos", 0);
+	max_set_uint64t(act, "readCmdKernel1", "cmdSize", LQCD_spCmdSize);
+	max_set_uint64t(act, "readCmdKernel1", "burstsPerTSlice", burstsPerSpinorTimeSlice/LQCD_spCmdSize);
+
 	max_route(act, "spfromLmem0Demux", "spfromLmem0Demux_toCPU");
 
 	max_ignore_kernel(act, "diracKernel");
-	max_ignore_kernel(act, "gReadCmdKernel");
-	max_ignore_kernel(act, "gWriteCmdKernel");
-	max_ignore_kernel(act, "spWriteCmdKernel");
-	max_ignore_kernel(act, "spReadCmdKernel1");
-	max_ignore_route(act, "sptoLmemMux");
+	max_ignore_kernel(act, "readCmdKernel0");
+	max_ignore_kernel(act, "readCmdKernel2");
+	max_ignore_kernel(act, "writeCmdKernel");
+	max_ignore_route(act, "toLmemMux");
 
 	max_run(engine, act);
 	max_actions_free(act);

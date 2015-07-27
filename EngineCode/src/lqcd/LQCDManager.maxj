@@ -20,10 +20,6 @@ public class LQCDManager extends CustomManager {
 		int LX = engineParameters.getLX();
 		int LY = engineParameters.getLY();
 		int LZ = engineParameters.getLZ();
-		int spCmdSize = engineParameters.getSpCmdSize();
-		int gCmdSize  = engineParameters.getGCmdSize();
-
-		int XYZ = LX*LY*LZ / 2;
 
 		config.setDefaultStreamClockFrequency(engineParameters.getFreq());
 
@@ -48,53 +44,46 @@ public class LQCDManager extends CustomManager {
 				)
 		);
 
-		AddressGeneratorGauge gWriteCmdKernel = new AddressGeneratorGauge(
-				makeKernelParameters("gWriteCmdKernel"),
-				T, XYZ, 0, gCmdSize,
-				"gWriteCmdOut");
-		DFELink gtoLmem = addStreamToOnCardMemory("gtoLmem", addKernel(gWriteCmdKernel).getOutput("gWriteCmdOut"));
-		gtoLmem <== addStreamFromCPU("gauge_in");
+		FieldAddressGenerator writeCmdKernel = new FieldAddressGenerator(
+				makeKernelParameters("writeCmdKernel"),
+				T,
+				"writeCmdOut");
+		DFELink toLmem = addStreamToOnCardMemory("toLmem", addKernel(writeCmdKernel).getOutput("writeCmdOut"));
 
-		AddressGeneratorGauge gReadCmdKernel = new AddressGeneratorGauge(
-				makeKernelParameters("gReadCmdKernel"),
-				T, XYZ, 1, gCmdSize,
-				"gReadCmdOut");
-		DFELink gfromLmem = addStreamFromOnCardMemory("gfromlmem", addKernel(gReadCmdKernel).getOutput("gReadCmdOut"));
+		FieldAddressGenerator readCmdKernel0 = new FieldAddressGenerator(
+				makeKernelParameters("readCmdKernel0"),
+				T,
+				"readCmdOut0");
+		DFELink fromLmem0 = addStreamFromOnCardMemory("fromLmem0", addKernel(readCmdKernel0).getOutput("readCmdOut0"));
 
-		AddressGeneratorSpinor spWriteCmdKernel = new AddressGeneratorSpinor(
-				makeKernelParameters("spWriteCmdKernel"),
-				T, XYZ, spCmdSize,
-				"spWriteCmdOut");
-		DFELink sptoLmem = addStreamToOnCardMemory("sptoLmem", addKernel(spWriteCmdKernel).getOutput("spWriteCmdOut"));
+		FieldAddressGenerator readCmdKernel1 = new FieldAddressGenerator(
+				makeKernelParameters("readCmdKernel1"),
+				T,
+				"readCmdOut1");
+		DFELink fromLmem1 = addStreamFromOnCardMemory("fromLmem1", addKernel(readCmdKernel1).getOutput("readCmdOut1"));
 
-		AddressGeneratorSpinor spReadCmdKernel0 = new AddressGeneratorSpinor(
-				makeKernelParameters("spReadCmdKernel0"),
-				T, XYZ, spCmdSize,
-				"spReadCmdOut0");
-		DFELink spfromLmem0 = addStreamFromOnCardMemory("spfromlmem0", addKernel(spReadCmdKernel0).getOutput("spReadCmdOut0"));
-
-		AddressGeneratorSpinor spReadCmdKernel1 = new AddressGeneratorSpinor(
-				makeKernelParameters("spReadCmdKernel1"),
-				T, XYZ, spCmdSize,
-				"spReadCmdOut1");
-		DFELink spfromLmem1 = addStreamFromOnCardMemory("spfromlmem1", addKernel(spReadCmdKernel1).getOutput("spReadCmdOut1"));
+		FieldAddressGenerator readCmdKernel2 = new FieldAddressGenerator(
+				makeKernelParameters("readCmdKernel2"),
+				T,
+				"readCmdOut2");
+		DFELink fromLmem2 = addStreamFromOnCardMemory("fromLmem2", addKernel(readCmdKernel2).getOutput("readCmdOut2"));
 
 
-		diracKernel.getInput("diracKernel_gauge")     <== gfromLmem;
+		diracKernel.getInput("diracKernel_gauge")     <== fromLmem0;
 
 
 		Demux spfromLmem0Demux = demux("spfromLmem0Demux");
-		spfromLmem0Demux.getInput() <== spfromLmem0;
+		spfromLmem0Demux.getInput() <== fromLmem1;
 		diracKernel.getInput("diracKernel_spinor_in") <== spfromLmem0Demux.addOutput("spfromLmem0Demux_toKernel");
-		addStreamToCPU("spinor_out")                   <== spfromLmem0Demux.addOutput("spfromLmem0Demux_toCPU");
+		addStreamToCPU("data_out")                   <== spfromLmem0Demux.addOutput("spfromLmem0Demux_toCPU");
 
-		diracKernel.getInput("diracKernel_p_spinor_in") <== spfromLmem1;
+		diracKernel.getInput("diracKernel_p_spinor_in") <== fromLmem2;
 
-		Mux sptoLmemMux = mux("sptoLmemMux");
-		sptoLmemMux.addInput("sptoLmemMux_fromCPU") <== addStreamFromCPU("spinor_in");
-		sptoLmemMux.addInput("sptoLmemMux_fromKernel") <== diracKernel.getOutput("diracKernel_spinor_out");
+		Mux toLmemMux = mux("toLmemMux");
+		toLmemMux.addInput("toLmemMux_fromCPU") <== addStreamFromCPU("data_in");
+		toLmemMux.addInput("toLmemMux_fromKernel") <== diracKernel.getOutput("diracKernel_spinor_out");
 
-		sptoLmem <== sptoLmemMux.getOutput();
+		toLmem <== toLmemMux.getOutput();
 
 		//_CustomManagers.setStreamBufferSpaceRequirement(x4, 4608*2048);
 
