@@ -1,20 +1,20 @@
 /**\file */
-#ifndef SLIC_DECLARATIONS_S_LQCD_H
-#define SLIC_DECLARATIONS_S_LQCD_H
+#ifndef SLIC_DECLARATIONS_LQCD_H
+#define SLIC_DECLARATIONS_LQCD_H
 #include "MaxSLiCInterface.h"
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
 
-#define S_LQCD_LZ (8)
-#define S_LQCD_LY (8)
-#define S_LQCD_LX (16)
-#define S_LQCD_T (8)
-#define S_LQCD_gCmdSize (128)
-#define S_LQCD_spCmdSize (128)
-#define S_LQCD_loopOffset (16)
-#define S_LQCD_numPipes (2)
-#define S_LQCD_PCIE_ALIGNMENT (16)
+#define LQCD_LZ (8)
+#define LQCD_LY (8)
+#define LQCD_LX (16)
+#define LQCD_T (8)
+#define LQCD_gCmdSize (128)
+#define LQCD_spCmdSize (128)
+#define LQCD_loopOffset (16)
+#define LQCD_numPipes (4)
+#define LQCD_PCIE_ALIGNMENT (16)
 
 
 /*----------------------------------------------------------------------------*/
@@ -56,7 +56,7 @@ extern "C" {
  * \param [in] outstream_size_spinor_out The size of the stream outstream_spinor_out in bytes.
  * \param [in] routing_string A string containing comma-separated "from_name -> to_name" routing commands.
  */
-void S_LQCD(
+void LQCD(
 	uint64_t ticks_diracKernel,
 	uint64_t ticks_gReadCmdKernel,
 	uint64_t ticks_gWriteCmdKernel,
@@ -124,7 +124,7 @@ void S_LQCD(
  * \param [in] routing_string A string containing comma-separated "from_name -> to_name" routing commands.
  * \return A handle on the execution status, or NULL in case of error.
  */
-max_run_t *S_LQCD_nonblock(
+max_run_t *LQCD_nonblock(
 	uint64_t ticks_diracKernel,
 	uint64_t ticks_gReadCmdKernel,
 	uint64_t ticks_gWriteCmdKernel,
@@ -187,7 +187,7 @@ typedef struct {
 	void *outstream_spinor_out; /**<  [out] Stream "spinor_out". */
 	size_t outstream_size_spinor_out; /**<  [in] The size of the stream outstream_spinor_out in bytes. */
 	const char * routing_string; /**<  [in] A string containing comma-separated "from_name -> to_name" routing commands. */
-} S_LQCD_actions_t;
+} LQCD_actions_t;
 
 /**
  * \brief Advanced static function for the interface 'default'.
@@ -195,9 +195,9 @@ typedef struct {
  * \param [in] engine The engine on which the actions will be executed.
  * \param [in,out] interface_actions Actions to be executed.
  */
-void S_LQCD_run(
+void LQCD_run(
 	max_engine_t *engine,
-	S_LQCD_actions_t *interface_actions);
+	LQCD_actions_t *interface_actions);
 
 /**
  * \brief Advanced static non-blocking function for the interface 'default'.
@@ -211,9 +211,9 @@ void S_LQCD_run(
  * \param [in] interface_actions Actions to be executed.
  * \return A handle on the execution status of the actions, or NULL in case of error.
  */
-max_run_t *S_LQCD_run_nonblock(
+max_run_t *LQCD_run_nonblock(
 	max_engine_t *engine,
-	S_LQCD_actions_t *interface_actions);
+	LQCD_actions_t *interface_actions);
 
 /**
  * \brief Group run advanced static function for the interface 'default'.
@@ -223,7 +223,7 @@ max_run_t *S_LQCD_run_nonblock(
  *
  * Run the actions on the first device available in the group.
  */
-void S_LQCD_run_group(max_group_t *group, S_LQCD_actions_t *interface_actions);
+void LQCD_run_group(max_group_t *group, LQCD_actions_t *interface_actions);
 
 /**
  * \brief Group run advanced static non-blocking function for the interface 'default'.
@@ -238,7 +238,7 @@ void S_LQCD_run_group(max_group_t *group, S_LQCD_actions_t *interface_actions);
  * \param [in] interface_actions Actions to run.
  * \return A handle on the execution status of the actions, or NULL in case of error.
  */
-max_run_t *S_LQCD_run_group_nonblock(max_group_t *group, S_LQCD_actions_t *interface_actions);
+max_run_t *LQCD_run_group_nonblock(max_group_t *group, LQCD_actions_t *interface_actions);
 
 /**
  * \brief Array run advanced static function for the interface 'default'.
@@ -249,7 +249,7 @@ max_run_t *S_LQCD_run_group_nonblock(max_group_t *group, S_LQCD_actions_t *inter
  * Run the array of actions on the array of engines.  The length of interface_actions
  * must match the size of engarray.
  */
-void S_LQCD_run_array(max_engarray_t *engarray, S_LQCD_actions_t *interface_actions[]);
+void LQCD_run_array(max_engarray_t *engarray, LQCD_actions_t *interface_actions[]);
 
 /**
  * \brief Array run advanced static non-blocking function for the interface 'default'.
@@ -264,7 +264,7 @@ void S_LQCD_run_array(max_engarray_t *engarray, S_LQCD_actions_t *interface_acti
  * \param [in] interface_actions The array of actions to run.
  * \return A handle on the execution status of the actions, or NULL in case of error.
  */
-max_run_t *S_LQCD_run_array_nonblock(max_engarray_t *engarray, S_LQCD_actions_t *interface_actions[]);
+max_run_t *LQCD_run_array_nonblock(max_engarray_t *engarray, LQCD_actions_t *interface_actions[]);
 
 /**
  * \brief Converts a static-interface action struct into a dynamic-interface max_actions_t struct.
@@ -275,26 +275,26 @@ max_run_t *S_LQCD_run_array_nonblock(max_engarray_t *engarray, S_LQCD_actions_t 
  * \param [in] interface_actions The interface-specific actions to run.
  * \return The dynamic-interface actions to run, or NULL in case of error.
  */
-max_actions_t* S_LQCD_convert(max_file_t *maxfile, S_LQCD_actions_t *interface_actions);
+max_actions_t* LQCD_convert(max_file_t *maxfile, LQCD_actions_t *interface_actions);
 
 /**
  * \brief Initialise a maxfile.
  */
-max_file_t* S_LQCD_init(void);
+max_file_t* LQCD_init(void);
 
 /* Error handling functions */
-int S_LQCD_has_errors(void);
-const char* S_LQCD_get_errors(void);
-void S_LQCD_clear_errors(void);
+int LQCD_has_errors(void);
+const char* LQCD_get_errors(void);
+void LQCD_clear_errors(void);
 /* Free statically allocated maxfile data */
-void S_LQCD_free(void);
+void LQCD_free(void);
 /* returns: -1 = error running command; 0 = no error reported */
-int S_LQCD_simulator_start(void);
+int LQCD_simulator_start(void);
 /* returns: -1 = error running command; 0 = no error reported */
-int S_LQCD_simulator_stop(void);
+int LQCD_simulator_stop(void);
 
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
-#endif /* SLIC_DECLARATIONS_S_LQCD_H */
+#endif /* SLIC_DECLARATIONS_LQCD_H */
 

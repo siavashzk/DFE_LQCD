@@ -1,6 +1,8 @@
 package lqcd;
 
 import com.maxeler.maxcompiler.v2.managers.BuildConfig;
+import com.maxeler.maxcompiler.v2.managers.BuildConfig.Effort;
+import com.maxeler.maxcompiler.v2.managers.BuildConfig.OptimizationTechnique;
 import com.maxeler.maxcompiler.v2.managers.custom.CustomManager;
 import com.maxeler.maxcompiler.v2.managers.custom.DFELink;
 import com.maxeler.maxcompiler.v2.managers.custom.blocks.Demux;
@@ -23,7 +25,6 @@ public class LQCDManager extends CustomManager {
 
 		int XYZ = LX*LY*LZ / 2;
 
-//		config.setOnCardMemoryFrequency(800);
 		config.setDefaultStreamClockFrequency(engineParameters.getFreq());
 
 		MemoryControllerConfig memCfg = new MemoryControllerConfig();
@@ -31,7 +32,7 @@ public class LQCDManager extends CustomManager {
 		memCfg.setMAX4qMode(true);
 		memCfg.setEnableParityMode(true, true, 72, false);
 		config.setMemoryControllerConfig(memCfg);
-		config.setOnCardMemoryFrequency(LMemFrequency.MAX4MAIA_800);
+		config.setOnCardMemoryFrequency(LMemFrequency.MAX4MAIA_666);
 
 		KernelBlock diracKernel = addKernel(
 				new LQCDKernel(
@@ -123,6 +124,9 @@ public class LQCDManager extends CustomManager {
 		buildConfig.setMPPRCostTableSearchRange(params.getMPPRStartCT(), params.getMPPREndCT());
 		buildConfig.setMPPRParallelism(params.getMPPRThreads());
 		buildConfig.setMPPRRetryNearMissesThreshold(params.getMPPRRetryThreshold());
+		buildConfig.setBuildEffort(Effort.HIGH);
+
+		buildConfig.setOptimizationGoal(OptimizationTechnique.AREA);
 	}
 
 	public static void main(String[] args) {

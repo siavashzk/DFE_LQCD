@@ -45,6 +45,7 @@ static max_file_t *maxfile;
 static max_engine_t *engine;
 static int burstsPerGaugeT, burstsPerSpinorT;
 static double beta_s, beta_t_b, beta_t_f, mass;
+static double elapsedTime;
 
 
 int main(void) {
@@ -62,6 +63,8 @@ int main(void) {
 	beta_t_f = 0.3;
 	beta_t_b = 0.3;
 	mass     = 0.1;
+
+  setbuf(stdout, NULL);
 
 	spinor *in, *out, *out_dfe, *out_expected, *tmp;
 	su3 *u0, *u0_re;
@@ -130,11 +133,11 @@ int main(void) {
 	transfer_spinors_to_dfe (in, address_p) ;
 	printf("Done!\n");
 
-	struct timeval start_time, end_time;
 
-	gettimeofday(&start_time, NULL);
+	elapsedTime = 0.0;
 
-	for (int i = 0; i<1 ; i++) {
+	int Iterations = 1;
+	for (int i = 0; i<Iterations ; i++) {
 		printf("Calculating on DFE ...");
 		apply_dirac (address_p,   address_tmp, address_g1, 0,          1, 0, 0);
 		apply_dirac (address_tmp, address_mp,  address_g0, address_p,  0, 1, 0);
@@ -143,13 +146,9 @@ int main(void) {
 		printf("Done!\n");
 	}
 
-	gettimeofday(&end_time, NULL);
-
-	double elapsedTime = (end_time.tv_sec - start_time.tv_sec) * 1000.0;      // sec to ms
-	elapsedTime += (end_time.tv_usec - start_time.tv_usec) / 1000.0;   // us to ms
 
 	printf("DFE time elapsed: %f ms\n", elapsedTime);
-	printf("DFE Throughput: %g GFLOPS\n", (1320.0*(double)VOLUME/2*4*1.0)*1000.0/elapsedTime);
+	printf("DFE Throughput: %g FLOPS\n", (1320.0*(double)VOLUME/2*4*Iterations)*1000.0/elapsedTime);
 
 	printf("Transferring Input Spinors to Memory  ...");
 	transfer_spinors_to_cpu (out_dfe, address_mmp);
@@ -212,6 +211,7 @@ void transfer_gauges_to_dfe (su3 *in, int address) {
 void apply_dirac (int in_address, int out_address, int gauge_address, int p_address, int ieo, int doSub, int isign) {
 	max_actions_t *act = max_actions_init(maxfile, 0);
 
+
 	max_set_double(act, "diracKernel", "ieo", ieo);
 	max_set_double(act, "diracKernel", "doSub", doSub);
 	max_set_double(act, "diracKernel", "isign", isign);
@@ -248,7 +248,14 @@ void apply_dirac (int in_address, int out_address, int gauge_address, int p_addr
 
 	max_ignore_kernel(act, "gWriteCmdKernel");
 
+	struct timeval start_time, end_time;
+
+	gettimeofday(&start_time, NULL);
 	max_run(engine, act);
+	gettimeofday(&end_time, NULL);
+
+	elapsedTime += (end_time.tv_sec - start_time.tv_sec) * 1000.0;      // sec to ms
+	elapsedTime += (end_time.tv_usec - start_time.tv_usec) / 1000.0;   // us to ms
 	max_actions_free(act);
 }
 

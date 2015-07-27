@@ -34,7 +34,7 @@
 <deleteDRAM enabled="false"/>
 <maxDRAMSize enabled="false"/>
 <DRAMFile enabled="false"/>
-<socketName>skamaliS_LQCD</socketName>
+<socketName>skamaliLQCD</socketName>
 <startStopScript enabled="false"/>
 <numberOfDevices>1</numberOfDevices>
 <ethernetOneEnabled enabled="false"/>

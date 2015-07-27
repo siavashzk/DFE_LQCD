@@ -47,10 +47,6 @@ public class DFESu3Vector extends KernelLib {
 		c1 = su3vec[1];
 		c2 = su3vec[2];
 
-		//c0 <== cplxType.newInstance(Owner);
-		//c1 <== cplxType.newInstance(Owner);
-		//c2 <== cplxType.newInstance(Owner);
-
 	}
 
 	void connect (DFESu3Vector a) {
