@@ -1,0 +1,249 @@
+package lqcd;
+
+import com.maxeler.maxcompiler.v0.utils.MathUtils;
+import com.maxeler.maxcompiler.v2.kernelcompiler.KernelLib;
+import com.maxeler.maxcompiler.v2.kernelcompiler.RoundingMode;
+import com.maxeler.maxcompiler.v2.kernelcompiler.stdlib.core.CounterChain;
+import com.maxeler.maxcompiler.v2.kernelcompiler.types.base.DFEVar;
+
+public class Dslash extends KernelLib {
+
+	int m_numPipes, m_loopOffset, m_ticksPerSite;
+	LQCDConstants m_constants;
+	int m_T,m_LZ,m_LY,m_LX;
+
+	DFEVar m_InputEnableK, m_InputEnableP, m_InputEnableGauge, m_outputEnableSpinor;
+	DFESpinor m_output;
+
+
+	protected Dslash(LQCDConstants constants, DFESpinor k, DFESpinor p, DFESu3[] gauges) {
+		super(constants.getKernel());
+		m_constants = constants;
+		m_numPipes = constants.numPipes;
+		m_T = constants.T;
+		m_LX = constants.LX;
+		m_LY = constants.LY;
+		m_LZ = constants.LZ;
+		m_loopOffset = constants.loopOffset;
+		m_ticksPerSite = 16/m_numPipes;
+
+		m_output = createDslash(k, p, gauges);
+
+	}
+
+	public DFEVar getInputEnableSpinorK () {
+		return m_InputEnableK;
+	}
+
+	public DFEVar getInputEnableSpinorP () {
+		return m_InputEnableP;
+	}
+
+	public DFEVar getInputEnableGauge () {
+		return m_InputEnableGauge;
+	}
+
+	public DFEVar getOutputEnableSpinor () {
+		return m_outputEnableSpinor;
+	}
+
+	public DFESpinor getOutput () {
+		return m_output;
+	}
+
+	private DFESpinor createDslash(DFESpinor k, DFESpinor p, DFESu3[] gauges) {
+
+
+		HalfSpinorBuffer buffer = new HalfSpinorBuffer(m_constants);
+
+		DFEVar beta_s   = io.scalarInput("beta_s",   LQCDConstants.realType );
+		DFEVar beta_t_f = io.scalarInput("beta_t_f", LQCDConstants.realType );
+		DFEVar beta_t_b = io.scalarInput("beta_t_b", LQCDConstants.realType );
+		DFEVar ieo   = io.scalarInput("ieo", dfeBool() );
+		DFEVar doSub   = io.scalarInput("doSub", dfeBool() );
+		DFEVar negSign   = io.scalarInput("isign", dfeBool() );
+
+
+		CounterChain tickChain = control.count.makeCounterChain();
+		DFEVar tick = tickChain.addCounter(
+				m_ticksPerSite *( (m_T+2)*m_LZ*m_LY*m_LX/2 + m_loopOffset ) + 2,
+				1);
+
+		DFEVar writeChainEnable = tick < ( m_ticksPerSite*(m_T+2)*m_LZ*m_LY*m_LX/2 ) ;
+		DFEVar readChainEnable  = tick > ( m_ticksPerSite*(2*m_LZ*m_LY*m_LX/2 + m_loopOffset) + 1) ;
+
+
+		CounterChain writeChain = control.count.makeCounterChain(writeChainEnable);
+		DFEVar t = writeChain.addCounter(m_T+2, 1);
+		DFEVar z = writeChain.addCounter(m_LZ, 1);
+		DFEVar y = writeChain.addCounter(m_LY, 1);
+		DFEVar x = writeChain.addCounter(m_LX/2, 1);
+		DFEVar iter = (m_numPipes==16) ? constant.var(dfeUInt(1),0) : writeChain.addCounter(16/m_numPipes, 1);
+
+		buffer.setWriteEnable(writeChainEnable);
+		buffer.setWriteCoordinates(t, z, y, x, iter);
+
+		DFEVar loopOffset_ = constant.var(
+				dfeUInt(MathUtils.bitsToRepresent(m_loopOffset)),
+				m_loopOffset
+				);
+		DFEVar LXH_ = constant.var(
+				dfeUInt( MathUtils.bitsToRepresent(m_LX/2)),
+				m_LX/2
+				);
+
+		CounterChain chain2 = control.count.makeCounterChain(readChainEnable);
+		DFEVar tr  = chain2.addCounter(m_T, 1);
+		DFEVar zr  = chain2.addCounter(m_LZ, 1);
+		DFEVar yxr  = (m_LY*m_LX/2 > m_loopOffset) ?
+					chain2.addCounter(m_LY*m_LX/2/m_loopOffset, 1) : constant.var(0);
+		DFEVar iterr = (m_numPipes==16) ? constant.var(dfeUInt(1),0) : chain2.addCounter(16/m_numPipes, 1);
+		DFEVar yxrloop = chain2.addCounter(m_loopOffset, 1);
+
+		optimization.pushEnableBitGrowth(true);
+		optimization.pushRoundingMode(RoundingMode.TRUNCATE);
+
+		yxr = yxr * loopOffset_ + yxrloop;
+		DFEVar yr = (yxr / (LXH_))
+		            .cast(dfeUInt(MathUtils.bitsToAddress(m_LY)));
+		DFEVar xr = (yxr - yr * LXH_)
+		            .cast(dfeUInt(MathUtils.bitsToAddress(m_LX/2)));
+
+		optimization.popRoundingMode();
+		optimization.popEnableBitGrowth();
+
+		tr = tr.cast(dfeUInt(MathUtils.bitsToAddress(m_T+2)));
+		zr = zr.cast(dfeUInt(MathUtils.bitsToAddress(m_LZ)));
+
+		buffer.setReadCoordinates(tr+1, zr, yr, xr, iterr, ieo);
+
+		m_InputEnableK       = writeChainEnable & (iter===0);
+		m_InputEnableGauge   = writeChainEnable;
+		m_InputEnableP       = doSub & readChainEnable & (iterr===0);
+		m_outputEnableSpinor = readChainEnable & (iterr===(16/m_numPipes-1));
+
+
+		DFESu3Vector a, b;
+		DFESu3Vector psi;
+		DFESu3 g;
+		DFEVar coeff;
+		DFEVar numPipes_ = constant.var(dfeUInt(MathUtils.bitsToRepresent(m_numPipes)),m_numPipes);
+
+		for (int i = 0; i < m_numPipes ; i++ ) {
+
+			DFEVar i_ = constant.var( dfeUInt( MathUtils.bitsToRepresent(m_numPipes)), i);
+
+			optimization.pushEnableBitGrowth(true);
+			DFEVar index = (iter*numPipes_ + i_);
+			optimization.popEnableBitGrowth();
+			DFEVar mu  = index >> 1;  // divide by 2 (truncates)
+			DFEVar dir = mu >> 1;     // divide by 2 (truncates)
+			DFEVar vec = index & 1;
+
+			DFEVar vec0 = vec === 0;
+			DFEVar dir23 = (dir === 2 | dir === 3);
+			DFEVar mu17 = mu === 1 | mu === 7;
+			DFEVar mu25 = mu === 2 | mu === 5;
+			DFEVar mu34 = mu === 3 | mu === 4;
+
+			DFEQCDSelector aS0Selector    = new DFEQCDSelector(m_constants, vec0 );
+			DFEQCDSelector bS2Selector    = new DFEQCDSelector(m_constants, vec0 & dir23 | (~vec0) & (~dir23) );
+			DFEQCDSelector bNegSelector   = new DFEQCDSelector(m_constants, ( mu17 | (vec0 & mu25) | (~vec0 & mu34) ) ^ (negSign === 1) );
+			DFEQCDSelector bMultISelector = new DFEQCDSelector(m_constants, dir === 0 | dir === 2 );
+			DFEQCDSelector gTransSelector = new DFEQCDSelector(m_constants, (mu&1) === 1);
+
+			a = aS0Selector    ? k.s0 : k.s1 ;
+			b = bS2Selector    ? k.s2 : k.s3 ;
+			b = bNegSelector   ? -b         : b ;
+			b = bMultISelector ? b.mult_i() : b ;
+			psi = a + b;
+			g = gTransSelector ? gauges[i/2].transpose() : gauges[i/2].conjugate() ;
+			psi = g * psi;
+			coeff = (mu < 6) ? beta_s : ( (mu===6) ? beta_t_b : beta_t_f );
+			psi = psi * coeff;
+			buffer.setBufferIn(i, psi);
+		}
+
+		DFESpinor addend2 = new DFESpinor(m_constants);
+		addend2.newZeroInstant();
+
+		DFEQCDSelector doSubSelect = new DFEQCDSelector (m_constants, doSub===1 );
+
+		if (m_numPipes>1) {
+
+			DFESpinor[] addends = new DFESpinor[m_numPipes/2];
+			DFEHalfSpinor phi = new DFEHalfSpinor(m_constants);
+
+			for (int i = 0; i < m_numPipes/2 ; i++ ) {
+
+				phi.s0 = buffer.getBufferOut(i*2);
+				phi.s1 = buffer.getBufferOut(i*2+1);
+
+				DFEVar i_ = constant.var( dfeUInt( MathUtils.bitsToRepresent(m_numPipes)), i);
+
+				optimization.pushEnableBitGrowth(true);
+				DFEVar index = (iterr*numPipes_ + i_*2);
+				optimization.popEnableBitGrowth();
+				DFEVar mu  = index >> 1;  // divide by 2 (truncates)
+				DFEVar dir = mu >> 1;     // divide by 2 (truncates)
+				DFEVar mu07 = mu === 0 | mu === 7;
+				DFEVar mu34 = mu === 3 | mu === 4;
+				DFEVar mu25 = mu === 2 | mu === 5;
+
+				DFEQCDSelector addends2S1Select = new DFEQCDSelector (m_constants, dir === 0 | dir === 1 );
+				DFEQCDSelector addendsMultISelect = new DFEQCDSelector (m_constants, dir === 0 | dir === 2 );
+				DFEQCDSelector addends2NegSelect = new DFEQCDSelector (m_constants, (mu07 | mu34) ^ (negSign === 1));
+				DFEQCDSelector addends3NegSelect = new DFEQCDSelector (m_constants, (mu07 | mu25) ^ (negSign === 1));
+
+				addends[i] = new DFESpinor(m_constants);
+				addends[i].s0 = phi.s0;
+				addends[i].s1 = phi.s1;
+
+				addends[i].s2 = addends2S1Select   ? phi.s1                 : phi.s0 ;
+				addends[i].s2 = addendsMultISelect ? addends[i].s2.mult_i() : addends[i].s2 ;
+				addends[i].s2 = addends2NegSelect  ? -addends[i].s2         : addends[i].s2 ;
+
+				addends[i].s3 = addends2S1Select   ? phi.s0                 : phi.s1 ;
+				addends[i].s3 = addendsMultISelect ? addends[i].s3.mult_i() : addends[i].s3 ;
+				addends[i].s3 = addends3NegSelect  ? -addends[i].s3         : addends[i].s3 ;
+
+				addends[i] = doSubSelect ? -addends[i] : addends[i];
+
+			}
+
+			for (int i = 0; i < m_numPipes/2 ; i++ ) {
+				addend2.s0 += addends[i].s0;
+				addend2.s1 += addends[i].s1;
+				addend2.s2 += addends[i].s2;
+				addend2.s3 += addends[i].s3;
+			}
+
+		} else {
+			// Number of pipes is asserted in the Constants initialization. This line should never be executed
+			throw new RuntimeException("A single pipe is not currently supported");
+		}
+
+		DFESpinor addend1     = new DFESpinor(m_constants);
+		DFESpinor accumulator = new DFESpinor(m_constants);
+
+		DFEVar alpha = io.scalarInput("alpha", LQCDConstants.realType );
+		p = p * alpha;
+
+		DFESpinor zeroAddend = new DFESpinor(m_constants);
+		zeroAddend.newZeroInstant();
+
+		DFESpinor initAddend = doSubSelect ? p : zeroAddend ;
+
+		accumulator.newInstant();
+
+		DFEQCDSelector newSum = new DFEQCDSelector (m_constants, iterr===0 );
+
+		addend1 = newSum ? initAddend : accumulator.streamoffset(-m_loopOffset);
+
+		accumulator <== addend1 + addend2;
+
+		return accumulator;
+
+	}
+
+}

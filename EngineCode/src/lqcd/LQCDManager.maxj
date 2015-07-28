@@ -39,7 +39,6 @@ public class LQCDManager extends CustomManager {
 						LZ,
 						engineParameters.getNumPipes(),
 						engineParameters.getLoopOffset(),
-						1,
 						false
 				)
 		);

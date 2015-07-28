@@ -20,7 +20,7 @@ public class HalfSpinorBuffer extends KernelLib {
 	private DFEVar write_t, write_x, write_y, write_z;
 
 	private final DFEVar write_iter;
-	private DFEVar read_t,  read_x,  read_y,  read_z;
+	private DFEVar read_t,  read_x,  read_y,  read_z, m_ieo;
 
 	private final DFEVar read_iter;
 
@@ -55,17 +55,18 @@ public class HalfSpinorBuffer extends KernelLib {
 
 		writeEnable = dfeBool().newInstance(owner);
 
-		write_t    = dfeUInt(MathUtils.bitsToAddress(T+2*m_constants.halos)) .newInstance(owner);
+		write_t    = dfeUInt(MathUtils.bitsToAddress(T+2)) .newInstance(owner);
 		write_z    = dfeUInt(MathUtils.bitsToAddress(LZ))  .newInstance(owner);
 		write_y    = dfeUInt(MathUtils.bitsToAddress(LY))  .newInstance(owner);
 		write_x    = dfeUInt(MathUtils.bitsToAddress(LX/2)).newInstance(owner);
 		write_iter = dfeUInt(max(MathUtils.bitsToAddress(m_vectorsPerSite),1)).newInstance(owner);
 
-		read_t    = dfeUInt(MathUtils.bitsToAddress(T+2*m_constants.halos)) .newInstance(owner);
+		read_t    = dfeUInt(MathUtils.bitsToAddress(T+2)) .newInstance(owner);
 		read_z    = dfeUInt(MathUtils.bitsToAddress(LZ))  .newInstance(owner);
 		read_y    = dfeUInt(MathUtils.bitsToAddress(LY))  .newInstance(owner);
 		read_x    = dfeUInt(MathUtils.bitsToAddress(LX/2)).newInstance(owner);
 		read_iter = dfeUInt(max(MathUtils.bitsToAddress(m_vectorsPerSite),1)).newInstance(owner);
+		m_ieo     = dfeBool().newInstance(owner);
 
 		m_bufferIn = new DFESu3Vector[m_numPipes];
 		m_bufferOut = new DFESu3Vector[m_numPipes];
@@ -94,7 +95,8 @@ public class HalfSpinorBuffer extends KernelLib {
 		write_iter <== iter;
 	}
 
-	public void setReadCoordinates(DFEVar t, DFEVar z, DFEVar y, DFEVar x, DFEVar iter) {
+	public void setReadCoordinates(DFEVar t, DFEVar z, DFEVar y, DFEVar x, DFEVar iter, DFEVar ieo) {
+		m_ieo  <== ieo;
 		read_t <== t;
 		read_z <== z;
 		read_y <== y;
@@ -192,7 +194,7 @@ public class HalfSpinorBuffer extends KernelLib {
 			(t&1).cast(dfeBool()) ^
 			(z&1).cast(dfeBool()) ^
 			(y&1).cast(dfeBool()) ^
-			(m_constants.halos&1) ^ m_constants.ieo;
+			1 ^ m_ieo;
 
 		DFEVar xn = mod(x + LX - 1 + isOddRow, LX/2)
 		            .cast(dfeUInt(MathUtils.bitsToAddress(LX/2)));
@@ -202,8 +204,8 @@ public class HalfSpinorBuffer extends KernelLib {
 		DFEVar yp = mod(y + 1, LY).cast(dfeUInt(MathUtils.bitsToAddress(LY)));
 		DFEVar zn = mod(z + LZ - 1, LZ).cast(dfeUInt(MathUtils.bitsToAddress(LZ)));
 		DFEVar zp = mod(z + 1, LZ).cast(dfeUInt(MathUtils.bitsToAddress(LZ)));
-		DFEVar tn = (t - 1).cast(dfeUInt(MathUtils.bitsToAddress(T+2*m_constants.halos)));
-		DFEVar tp = (t + 1).cast(dfeUInt(MathUtils.bitsToAddress(T+2*m_constants.halos)));
+		DFEVar tn = (t - 1).cast(dfeUInt(MathUtils.bitsToAddress(T+2)));
+		DFEVar tp = (t + 1).cast(dfeUInt(MathUtils.bitsToAddress(T+2)));
 
 		optimization.popEnableBitGrowth();
 
