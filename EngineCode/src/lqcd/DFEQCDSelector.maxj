@@ -4,17 +4,23 @@ import com.maxeler.maxcompiler.v2.kernelcompiler.KernelLib;
 import com.maxeler.maxcompiler.v2.kernelcompiler.types.base.DFEVar;
 import com.maxeler.maxcompiler.v2.kernelcompiler.types.composite.DFEComplex;
 
+/**
+ * This class serves as a placeholder for boolean variables that are used to select QCD data structures
+ * This is only needed to overload the ternaryIf operator to recognize user-defined classes
+ * @author Siavash Zangeneh
+ *
+ */
 public class DFEQCDSelector extends KernelLib {
 
-	private DFEVar selector;
+	private final DFEVar selector;
 
 	private final LQCDConstants m_constants;
 
-	protected DFEQCDSelector(LQCDConstants constants) {
-		super(constants.getKernel());
-		m_constants = constants;
-	}
-
+	/**
+	 * Constructor to instantiate the selector
+	 * @param constants holds information about the system such as original kernel object
+	 * @param v the variable that is used in ternaryIf for selection
+	 */
 	protected DFEQCDSelector(LQCDConstants constants, DFEVar v) {
 		super(constants.getKernel());
 		m_constants = constants;

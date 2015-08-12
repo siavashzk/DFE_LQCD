@@ -9,6 +9,8 @@ import com.maxeler.maxjlibs.io.aspectchange.AspectChangeIO;
 
 class LQCDKernel extends Kernel {
 
+	private final int LMEM_BURST = 384 * 8; // in bits
+
 	protected LQCDKernel(
 			KernelParameters parameters,
 			int T,
@@ -23,45 +25,39 @@ class LQCDKernel extends Kernel {
 
 		super(parameters);
 
-		LQCDConstants constants = new LQCDConstants(
-				this,
-				LX,
-				LY,
-				LZ,
-				T,
-				numPipes,
-				loopOffset);
+		LQCDConstants constants = new LQCDConstants(this, LX, LY, LZ, T, numPipes, loopOffset);
 
 		optimization.pushPipeliningFactor(0.5);
-
 
 		stream.suppressOffsetVectorWarnings();
 		AspectChangeIO acio = new AspectChangeIO(this);
 
+		//Input and output enables are only instantiated here, they are later connected to dslash operator
 		DFEVar inputEnableSpinor0 = dfeBool().newInstance(this);
 		DFEVar inputEnableSpinor1 = dfeBool().newInstance(this);
 		DFEVar inputEnableGauge   = dfeBool().newInstance(this);
 		DFEVar outputEnableSpinor = dfeBool().newInstance(this);
 
+		//acio does
 		DFEVector<DFEComplex> spinor_in0 = acio.input(
 				parameters.getName()+"_spinor_in",
 				LQCDConstants.getVectoredSpinorType(),
-				384*8,
+				LMEM_BURST,
 				inputEnableSpinor0
 				);
 		DFEVector<DFEComplex> spinor_in1 = acio.input(
 				parameters.getName()+"_p_spinor_in",
 				LQCDConstants.getVectoredSpinorType(),
-				384*8,
+				LMEM_BURST,
 				inputEnableSpinor1
 				);
 		DFEVector<DFEComplex> gauge_in = acio.input(
 				parameters.getName()+"_gauge",
 				LQCDConstants.getVectoredSu3Type(numPipes),
-				384*8,
+				LMEM_BURST,
 				inputEnableGauge );
 
-
+		// Inputs are cast as structured data (spinors and gauges)
 		DFESpinor k = new DFESpinor(constants, spinor_in0);
 		DFESpinor p = new DFESpinor(constants, spinor_in1);
 		DFESu3 gauges[] = new DFESu3[numPipes/2];
@@ -69,6 +65,7 @@ class LQCDKernel extends Kernel {
 			gauges[i] = new DFESu3(constants, gauge_in, i);
 		}
 
+		// The dslash operator is defined here
 		Dslash dslash = new Dslash(constants, k, p, gauges);
 		inputEnableSpinor0 <== dslash.getInputEnableSpinorK();
 		inputEnableSpinor1 <== dslash.getInputEnableSpinorP();

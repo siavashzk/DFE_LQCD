@@ -6,6 +6,11 @@ import com.maxeler.maxcompiler.v2.kernelcompiler.RoundingMode;
 import com.maxeler.maxcompiler.v2.kernelcompiler.stdlib.core.CounterChain;
 import com.maxeler.maxcompiler.v2.kernelcompiler.types.base.DFEVar;
 
+/**
+ * This is the dslash operator. Each instantiates of this class unrolls a dslash operator in space
+ * @author Siavash Zangeneh
+ *
+ */
 public class Dslash extends KernelLib {
 
 	int m_numPipes, m_loopOffset, m_ticksPerSite;
@@ -14,7 +19,6 @@ public class Dslash extends KernelLib {
 
 	DFEVar m_InputEnableK, m_InputEnableP, m_InputEnableGauge, m_outputEnableSpinor;
 	DFESpinor m_output;
-
 
 	protected Dslash(LQCDConstants constants, DFESpinor k, DFESpinor p, DFESu3[] gauges) {
 		super(constants.getKernel());
@@ -51,19 +55,28 @@ public class Dslash extends KernelLib {
 		return m_output;
 	}
 
+	/**
+	 * This function constructors unrolls the actual pipes
+	 * @param k
+	 * @param p
+	 * @param gauges
+	 * @return
+	 */
 	private DFESpinor createDslash(DFESpinor k, DFESpinor p, DFESu3[] gauges) {
 
-
+		//instantiate a buffer for this Dslash
 		HalfSpinorBuffer buffer = new HalfSpinorBuffer(m_constants);
 
+		//declare all scalar inputs
+		DFEVar alpha    = io.scalarInput("alpha",    LQCDConstants.realType );
 		DFEVar beta_s   = io.scalarInput("beta_s",   LQCDConstants.realType );
 		DFEVar beta_t_f = io.scalarInput("beta_t_f", LQCDConstants.realType );
 		DFEVar beta_t_b = io.scalarInput("beta_t_b", LQCDConstants.realType );
-		DFEVar ieo   = io.scalarInput("ieo", dfeBool() );
-		DFEVar doSub   = io.scalarInput("doSub", dfeBool() );
-		DFEVar negSign   = io.scalarInput("isign", dfeBool() );
+		DFEVar ieo      = io.scalarInput("ieo", dfeBool() );
+		DFEVar doSub    = io.scalarInput("doSub", dfeBool() );
+		DFEVar negSign  = io.scalarInput("isign", dfeBool() );
 
-
+		//counters that keep track of the phase of the kernel
 		CounterChain tickChain = control.count.makeCounterChain();
 		DFEVar tick = tickChain.addCounter(
 				m_ticksPerSite *( (m_T+2)*m_LZ*m_LY*m_LX/2 + m_loopOffset ) + 2,
@@ -72,7 +85,7 @@ public class Dslash extends KernelLib {
 		DFEVar writeChainEnable = tick < ( m_ticksPerSite*(m_T+2)*m_LZ*m_LY*m_LX/2 ) ;
 		DFEVar readChainEnable  = tick > ( m_ticksPerSite*(2*m_LZ*m_LY*m_LX/2 + m_loopOffset) + 1) ;
 
-
+		//counters that keep track of the coordinates of the input sites
 		CounterChain writeChain = control.count.makeCounterChain(writeChainEnable);
 		DFEVar t = writeChain.addCounter(m_T+2, 1);
 		DFEVar z = writeChain.addCounter(m_LZ, 1);
@@ -80,34 +93,30 @@ public class Dslash extends KernelLib {
 		DFEVar x = writeChain.addCounter(m_LX/2, 1);
 		DFEVar iter = (m_numPipes==16) ? constant.var(dfeUInt(1),0) : writeChain.addCounter(16/m_numPipes, 1);
 
+		//connect the write coordinates of the buffer
 		buffer.setWriteEnable(writeChainEnable);
 		buffer.setWriteCoordinates(t, z, y, x, iter);
 
-		DFEVar loopOffset_ = constant.var(
-				dfeUInt(MathUtils.bitsToRepresent(m_loopOffset)),
-				m_loopOffset
-				);
-		DFEVar LXH_ = constant.var(
-				dfeUInt( MathUtils.bitsToRepresent(m_LX/2)),
-				m_LX/2
-				);
-
+		//counters and logic to determine the read coordinates of the site
+		//because of the feedback latency, one cannot accumulate all the 8 directions in one iteration
+		//need to loop back for each site, unless there are 8 pipes
+		DFEVar loopOffset_ = constant.var( dfeUInt(MathUtils.bitsToRepresent(m_loopOffset)), m_loopOffset );
+		DFEVar LXH_        = constant.var( dfeUInt(MathUtils.bitsToRepresent(m_LX/2))      , m_LX/2 );
 		CounterChain chain2 = control.count.makeCounterChain(readChainEnable);
 		DFEVar tr  = chain2.addCounter(m_T, 1);
 		DFEVar zr  = chain2.addCounter(m_LZ, 1);
 		DFEVar yxr  = (m_LY*m_LX/2 > m_loopOffset) ?
 					chain2.addCounter(m_LY*m_LX/2/m_loopOffset, 1) : constant.var(0);
 		DFEVar iterr = (m_numPipes==16) ? constant.var(dfeUInt(1),0) : chain2.addCounter(16/m_numPipes, 1);
-		DFEVar yxrloop = chain2.addCounter(m_loopOffset, 1);
+		DFEVar yxrloop = chain2.addCounter(m_loopOffset, 1); //for flexibility in choosing loop latency, x and y counter are merged
 
 		optimization.pushEnableBitGrowth(true);
 		optimization.pushRoundingMode(RoundingMode.TRUNCATE);
 
+		//x and y coordinates from yxr and yxrloop counter
 		yxr = yxr * loopOffset_ + yxrloop;
-		DFEVar yr = (yxr / (LXH_))
-		            .cast(dfeUInt(MathUtils.bitsToAddress(m_LY)));
-		DFEVar xr = (yxr - yr * LXH_)
-		            .cast(dfeUInt(MathUtils.bitsToAddress(m_LX/2)));
+		DFEVar yr = (yxr / (LXH_)).cast(dfeUInt(MathUtils.bitsToAddress(m_LY)));
+		DFEVar xr = (yxr - yr * LXH_).cast(dfeUInt(MathUtils.bitsToAddress(m_LX/2)));
 
 		optimization.popRoundingMode();
 		optimization.popEnableBitGrowth();
@@ -115,6 +124,7 @@ public class Dslash extends KernelLib {
 		tr = tr.cast(dfeUInt(MathUtils.bitsToAddress(m_T+2)));
 		zr = zr.cast(dfeUInt(MathUtils.bitsToAddress(m_LZ)));
 
+		//connect the read coordinates of the buffer
 		buffer.setReadCoordinates(tr+1, zr, yr, xr, iterr, ieo);
 
 		m_InputEnableK       = writeChainEnable & (iter===0);
@@ -129,6 +139,7 @@ public class Dslash extends KernelLib {
 		DFEVar coeff;
 		DFEVar numPipes_ = constant.var(dfeUInt(MathUtils.bitsToRepresent(m_numPipes)),m_numPipes);
 
+		//Applying gauge link to the input spinors in each direction
 		for (int i = 0; i < m_numPipes ; i++ ) {
 
 			DFEVar i_ = constant.var( dfeUInt( MathUtils.bitsToRepresent(m_numPipes)), i);
@@ -152,15 +163,18 @@ public class Dslash extends KernelLib {
 			DFEQCDSelector bMultISelector = new DFEQCDSelector(m_constants, dir === 0 | dir === 2 );
 			DFEQCDSelector gTransSelector = new DFEQCDSelector(m_constants, (mu&1) === 1);
 
+			//selecting the proper sign and operations for the direction, read full documentation
 			a = aS0Selector    ? k.s0 : k.s1 ;
 			b = bS2Selector    ? k.s2 : k.s3 ;
 			b = bNegSelector   ? -b         : b ;
 			b = bMultISelector ? b.mult_i() : b ;
-			psi = a + b;
+			psi = a + b;  //3x1 vector additions
 			g = gTransSelector ? gauges[i/2].transpose() : gauges[i/2].conjugate() ;
-			psi = g * psi;
+			psi = g * psi; //3x3 matrix by 3x1 vector multiplication
 			coeff = (mu < 6) ? beta_s : ( (mu===6) ? beta_t_b : beta_t_f );
-			psi = psi * coeff;
+			psi = psi * coeff; //scalar to 3x3 matrix multiplication
+
+			//store the final results in the buffer
 			buffer.setBufferIn(i, psi);
 		}
 
@@ -195,6 +209,7 @@ public class Dslash extends KernelLib {
 				DFEQCDSelector addends2NegSelect = new DFEQCDSelector (m_constants, (mu07 | mu34) ^ (negSign === 1));
 				DFEQCDSelector addends3NegSelect = new DFEQCDSelector (m_constants, (mu07 | mu25) ^ (negSign === 1));
 
+				//forms the addend for the pipe based on direction, see full documentation for details
 				addends[i] = new DFESpinor(m_constants);
 				addends[i].s0 = phi.s0;
 				addends[i].s1 = phi.s1;
@@ -211,6 +226,7 @@ public class Dslash extends KernelLib {
 
 			}
 
+			//accumulate the addends from all the sites in the same cycle
 			for (int i = 0; i < m_numPipes/2 ; i++ ) {
 				addend2.s0 += addends[i].s0;
 				addend2.s1 += addends[i].s1;
@@ -226,20 +242,22 @@ public class Dslash extends KernelLib {
 		DFESpinor addend1     = new DFESpinor(m_constants);
 		DFESpinor accumulator = new DFESpinor(m_constants);
 
-		DFEVar alpha = io.scalarInput("alpha", LQCDConstants.realType );
 		p = p * alpha;
 
 		DFESpinor zeroAddend = new DFESpinor(m_constants);
 		zeroAddend.newZeroInstant();
 
-		DFESpinor initAddend = doSubSelect ? p : zeroAddend ;
 
 		accumulator.newInstant();
 
 		DFEQCDSelector newSum = new DFEQCDSelector (m_constants, iterr===0 );
 
+		// if working on a new site, first addend is either going to be 0 or spinor "p" depending on doSub
+		// if not, the first addend is the accumulated sum up until this cycle
+		DFESpinor initAddend = doSubSelect ? p : zeroAddend ;
 		addend1 = newSum ? initAddend : accumulator.streamoffset(-m_loopOffset);
 
+		// accumulate the sum of addends in this cycle
 		accumulator <== addend1 + addend2;
 
 		return accumulator;

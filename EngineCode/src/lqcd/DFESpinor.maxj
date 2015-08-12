@@ -5,18 +5,36 @@ import com.maxeler.maxcompiler.v2.kernelcompiler.types.base.DFEVar;
 import com.maxeler.maxcompiler.v2.kernelcompiler.types.composite.DFEComplex;
 import com.maxeler.maxcompiler.v2.kernelcompiler.types.composite.DFEVector;
 
+/**
+ * This class represents a 4x3 spinor matrix and
+ * provides methods for a few arithmetic operations on spinors.
+ * @author Siavash Zangeneh
+ *
+ */
 public class DFESpinor extends KernelLib {
 
+	/**
+	 * 4 su3Vectors, each su3vector is a 3x1 vector
+	 */
 	public DFESu3Vector s0, s1, s2, s3;
+
 
 	private final LQCDConstants m_constants;
 
-
+	/**
+	 * Constructor without instantiation of the DFE variables
+	 * @param constants holds information about the system such as arithmetic format
+	 */
 	protected DFESpinor(LQCDConstants constants) {
 		super(constants.getKernel());
 		m_constants = constants;
 	}
 
+	/**
+	 * Constructor with data initialization
+	 * @param constants holds information about the system such as arithmetic format
+	 * @param in a vector of size 12, holding initial value of the spinor
+	 */
 	protected DFESpinor(LQCDConstants constants, DFEVector<DFEComplex> in) {
 		super(constants.getKernel());
 		m_constants = constants;
@@ -43,6 +61,9 @@ public class DFESpinor extends KernelLib {
 
 	}
 
+	/**
+	 * Instantiates the spinor elements, without connecting to actual nodes
+	 */
 	public void newInstant() {
 		s0 = new DFESu3Vector (m_constants);
 		s1 = new DFESu3Vector (m_constants);
@@ -50,13 +71,26 @@ public class DFESpinor extends KernelLib {
 		s3 = new DFESu3Vector (m_constants);
 	}
 
+	/**
+	 * Instantiates the spinor with all zero elements
+	 */
 	public void newZeroInstant() {
-		s0 = new DFESu3Vector (m_constants, 0, 0);
-		s1 = new DFESu3Vector (m_constants, 0, 0);
-		s2 = new DFESu3Vector (m_constants, 0, 0);
-		s3 = new DFESu3Vector (m_constants, 0, 0);
+		s0 = new DFESu3Vector (m_constants);
+		s1 = new DFESu3Vector (m_constants);
+		s2 = new DFESu3Vector (m_constants);
+		s3 = new DFESu3Vector (m_constants);
+
+		s0.setZero();
+		s1.setZero();
+		s2.setZero();
+		s3.setZero();
 	}
 
+	/**
+	 * Works the same as streamoffset for DFEVars, except that it is defined for DFESpinors
+	 * @param offset integer offset
+	 * @return the object holding the offsetted spinor
+	 */
 	public DFESpinor streamoffset(int offset) {
 		DFESpinor temp = new DFESpinor(m_constants);
 
@@ -68,6 +102,11 @@ public class DFESpinor extends KernelLib {
 		return temp;
 	}
 
+	/**
+	 * Adds this spinor with another spinor and returns the result as a new spinor object
+	 * @param a the addend spinor
+	 * @return the sum spinor
+	 */
 	public DFESpinor add (DFESpinor a) {
 		DFESpinor temp = new DFESpinor(m_constants);
 		temp.s0 = s0 + a.s0;
@@ -77,6 +116,11 @@ public class DFESpinor extends KernelLib {
 		return temp;
 	}
 
+	/**
+	 * Multiply each element of this spinor with a DFEVar and returns the result as a new spinor object
+	 * @param a the multiplicand
+	 * @return the result of Spinor-number multiply
+	 */
 	public DFESpinor mul (DFEVar a) {
 		DFESpinor temp = new DFESpinor(m_constants);
 		temp.s0 = s0 * a;
@@ -86,6 +130,10 @@ public class DFESpinor extends KernelLib {
 		return temp;
 	}
 
+	/**
+	 * Negate each element of this spinor
+	 * @return the negation of the spinor
+	 */
 	public DFESpinor neg () {
 		DFESpinor temp = new DFESpinor(m_constants);
 		temp.s0 = -s0;
@@ -95,6 +143,10 @@ public class DFESpinor extends KernelLib {
 		return temp;
 	}
 
+	/**
+	 * Connects each element of this spinor with the element of an input spinor
+	 * @param a the input spinor to connect with
+	 */
 	public void connect (DFESpinor a) {
 		s0 <== a.s0;
 		s1 <== a.s1;
@@ -102,6 +154,10 @@ public class DFESpinor extends KernelLib {
 		s3 <== a.s3;
 	}
 
+	/**
+	 * converts the spinor to a vector of complex numbers, suitable for output ports
+	 * @return the vectored spinor
+	 */
 	public DFEVector<DFEComplex> convertToDFEVector () {
 		DFEVector<DFEComplex> result =
 			LQCDConstants.getVectoredSpinorType().newInstance(m_constants.getKernel());

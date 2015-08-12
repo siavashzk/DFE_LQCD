@@ -6,13 +6,27 @@ import com.maxeler.maxcompiler.v2.kernelcompiler.types.composite.DFEComplex;
 import com.maxeler.maxcompiler.v2.kernelcompiler.types.composite.DFEComplexType;
 import com.maxeler.maxcompiler.v2.kernelcompiler.types.composite.DFEVector;
 
+/**
+ * Represents a 3x1 matrix to hold spinors.
+ * Define a few methods for doing arithmetic on this data structure
+ * @author Siavash Zangeneh
+ *
+ */
 public class DFESu3Vector extends KernelLib {
 
+
+	/**
+	 * 3 complex numbers, forming the vector
+	 */
 	public DFEComplex c0, c1, c2;
 
 	private final LQCDConstants m_constants;
 	private final DFEComplexType m_cplxType;
 
+	/**
+	 * Constructor without instantiation of the DFE variables
+	 * @param constants holds information about the system such as arithmetic format
+	 */
 	protected DFESu3Vector(LQCDConstants constants) {
 		super(constants.getKernel());
 		m_constants = constants;
@@ -22,22 +36,11 @@ public class DFESu3Vector extends KernelLib {
 		c2 = m_cplxType.newInstance(constants.getKernel());
 	}
 
-	protected DFESu3Vector(LQCDConstants constants, int real, int imag) {
-		super(constants.getKernel());
-		m_constants = constants;
-		m_cplxType = LQCDConstants.complexType;
-		c0 = m_cplxType.newInstance(constants.getKernel());
-		c1 = m_cplxType.newInstance(constants.getKernel());
-		c2 = m_cplxType.newInstance(constants.getKernel());
-
-		c0.setReal(     constant.var(LQCDConstants.realType,real));
-		c0.setImaginary(constant.var(LQCDConstants.realType,imag));
-		c1.setReal(     constant.var(LQCDConstants.realType,real));
-		c1.setImaginary(constant.var(LQCDConstants.realType,imag));
-		c2.setReal(     constant.var(LQCDConstants.realType,real));
-		c2.setImaginary(constant.var(LQCDConstants.realType,imag));
-	}
-
+	/**
+	 * Constructor with data initialization
+	 * @param constants holds information about the system such as arithmetic format
+	 * @param in a vector of size 3, holding initial value of the su3vector
+	 */
 	protected DFESu3Vector(LQCDConstants constants, DFEVector<DFEComplex> su3vec) {
 		super(constants.getKernel());
 		m_constants = constants;
@@ -49,12 +52,33 @@ public class DFESu3Vector extends KernelLib {
 
 	}
 
+	/**
+	 * sets all the vector elements to zero
+	 */
+	protected void setZero() {
+		c0.setReal(     constant.var(LQCDConstants.realType,0));
+		c0.setImaginary(constant.var(LQCDConstants.realType,0));
+		c1.setReal(     constant.var(LQCDConstants.realType,0));
+		c1.setImaginary(constant.var(LQCDConstants.realType,0));
+		c2.setReal(     constant.var(LQCDConstants.realType,0));
+		c2.setImaginary(constant.var(LQCDConstants.realType,0));
+	}
+
+	/**
+	 * connects the su3vector to another su3vector
+	 * @param a the su3vector to connect to
+	 */
 	void connect (DFESu3Vector a) {
 		c0 <== a.c0;
 		c1 <== a.c1;
 		c2 <== a.c2;
 	}
 
+	/**
+	 * su3vector addition
+	 * @param a the su3vector addend
+	 * @return the resulting su3vector sum
+	 */
 	DFESu3Vector add (DFESu3Vector a) {
 		DFESu3Vector temp = new DFESu3Vector(m_constants);
 		temp.c0 = c0 + a.c0;
@@ -63,6 +87,11 @@ public class DFESu3Vector extends KernelLib {
 		return temp;
 	}
 
+	/**
+	 * su3vector subtraction
+	 * @param a the su3vector subtrahend
+	 * @return the resulting su3vector difference
+	 */
 	DFESu3Vector sub (DFESu3Vector a) {
 		DFESu3Vector temp = new DFESu3Vector(m_constants);
 		temp.c0 = c0 - a.c0;
@@ -71,7 +100,12 @@ public class DFESu3Vector extends KernelLib {
 		return temp;
 	}
 
-	DFESu3Vector times_complex (DFEComplex a) {
+	/**
+	 * Multiply by a real number
+	 * @param a the real multiplicand
+	 * @return the resulting su3vector product
+	 */
+	DFESu3Vector mul (DFEVar a) {
 		DFESu3Vector temp = new DFESu3Vector(m_constants);
 		temp.c0 = a * c0;
 		temp.c1 = a * c1;
@@ -79,6 +113,24 @@ public class DFESu3Vector extends KernelLib {
 		return temp;
 	}
 
+	/**
+	 * Multiply by a complex number
+	 * @param a the complex multiplicand
+	 * @return the resulting su3vector product
+	 */
+	DFESu3Vector mul (DFEComplex a) {
+		DFESu3Vector temp = new DFESu3Vector(m_constants);
+		temp.c0 = a * c0;
+		temp.c1 = a * c1;
+		temp.c2 = a * c2;
+		return temp;
+	}
+
+	/**
+	 * Multiply by the conjugate of a complex number
+	 * @param a the complex multiplicand
+	 * @return the resulting su3vector product
+	 */
 	DFESu3Vector times_complexcjg (DFEComplex a) {
 		DFESu3Vector temp = new DFESu3Vector(m_constants);
 		temp.c0 = a.conjugate() * c0;
@@ -87,6 +139,10 @@ public class DFESu3Vector extends KernelLib {
 		return temp;
 	}
 
+	/**
+	 * Multiplies the su3vector by complex term I
+	 * @return the su3vector resulted by multipling by I
+	 */
 	DFESu3Vector mult_i () {
 		DFESu3Vector temp = new DFESu3Vector(m_constants);
 		temp.c0.setReal(-c0.getImaginary());
@@ -98,6 +154,10 @@ public class DFESu3Vector extends KernelLib {
 		return temp;
 	}
 
+	/**
+	 * Duplicates the su3vector
+	 * @return the new object of same data
+	 */
 	DFESu3Vector duplicate () {
 		DFESu3Vector temp = new DFESu3Vector(m_constants);
 		temp.c0 = c0;
@@ -106,14 +166,10 @@ public class DFESu3Vector extends KernelLib {
 		return temp;
 	}
 
-	DFESu3Vector mul (DFEVar a) {
-		DFESu3Vector temp = new DFESu3Vector(m_constants);
-		temp.c0 = a * c0;
-		temp.c1 = a * c1;
-		temp.c2 = a * c2;
-		return temp;
-	}
-
+	/**
+	 * Negate each element of this su3vector
+	 * @return the negation of the su3vector
+	 */
 	DFESu3Vector neg () {
 		DFESu3Vector temp = new DFESu3Vector(m_constants);
 		temp.c0 = -c0;
@@ -122,18 +178,31 @@ public class DFESu3Vector extends KernelLib {
 		return temp;
 	}
 
+	/**
+	 * accumulates this su3vector with another one
+	 * @param a the su3vector to be added
+	 */
 	void add_assign (DFESu3Vector a) {
 		c0 += a.c0;
 		c1 += a.c1;
 		c2 += a.c2;
 	}
 
+	/**
+	 * subtracts a su3vector from this one
+	 * @param a the su3vector to be subtracted
+	 */
 	void sub_assign (DFESu3Vector a) {
 		c0 -= a.c0;
 		c1 -= a.c1;
 		c2 -= a.c2;
 	}
 
+	/**
+	 * Works the same as streamoffset for DFEVars, except that it is defined for DFESu3Vectors
+	 * @param offset integer offset
+	 * @return the object holding the offsetted su3vector
+	 */
 	public DFESu3Vector streamoffset(int offset) {
 		DFESu3Vector temp = new DFESu3Vector(m_constants);
 
@@ -144,7 +213,10 @@ public class DFESu3Vector extends KernelLib {
 		return temp;
 	}
 
-
+	/**
+	 * converts the su3vector to a vector of complex numbers, suitable for output ports
+	 * @return the vectored su3vector
+	 */
 	public DFEVector<DFEComplex> convertToDFEVector () {
 		DFEVector<DFEComplex> result =
 			LQCDConstants.getVectoredSu3VectorType().newInstance(m_constants);
