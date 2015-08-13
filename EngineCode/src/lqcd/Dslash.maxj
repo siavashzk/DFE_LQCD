@@ -68,10 +68,10 @@ public class Dslash extends KernelLib {
 		HalfSpinorBuffer buffer = new HalfSpinorBuffer(m_constants);
 
 		//declare all scalar inputs
-		DFEVar alpha    = io.scalarInput("alpha",    LQCDConstants.realType );
-		DFEVar beta_s   = io.scalarInput("beta_s",   LQCDConstants.realType );
-		DFEVar beta_t_f = io.scalarInput("beta_t_f", LQCDConstants.realType );
-		DFEVar beta_t_b = io.scalarInput("beta_t_b", LQCDConstants.realType );
+		DFEVar alpha    = io.scalarInput("alpha",    LQCDConstants.realTypeStore ).cast(LQCDConstants.realTypeCompute);
+		DFEVar beta_s   = io.scalarInput("beta_s",   LQCDConstants.realTypeStore ).cast(LQCDConstants.realTypeCompute);
+		DFEVar beta_t_f = io.scalarInput("beta_t_f", LQCDConstants.realTypeStore ).cast(LQCDConstants.realTypeCompute);
+		DFEVar beta_t_b = io.scalarInput("beta_t_b", LQCDConstants.realTypeStore ).cast(LQCDConstants.realTypeCompute);
 		DFEVar ieo      = io.scalarInput("ieo", dfeBool() );
 		DFEVar doSub    = io.scalarInput("doSub", dfeBool() );
 		DFEVar negSign  = io.scalarInput("isign", dfeBool() );

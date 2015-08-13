@@ -40,15 +40,15 @@ public class DFESu3 extends KernelLib  {
 	protected DFESu3(LQCDConstants constants, DFEVector<DFEComplex> su3, int gauge_index) {
 		super(constants.getKernel());
 		m_constants = constants;
-		c00 = su3[gauge_index*9+0];
-		c01 = su3[gauge_index*9+1];
-		c02 = su3[gauge_index*9+2];
-		c10 = su3[gauge_index*9+3];
-		c11 = su3[gauge_index*9+4];
-		c12 = su3[gauge_index*9+5];
-		c20 = su3[gauge_index*9+6];
-		c21 = su3[gauge_index*9+7];
-		c22 = su3[gauge_index*9+8];
+		c00 = su3[gauge_index*9+0].cast(LQCDConstants.complexTypeCompute);
+		c01 = su3[gauge_index*9+1].cast(LQCDConstants.complexTypeCompute);
+		c02 = su3[gauge_index*9+2].cast(LQCDConstants.complexTypeCompute);
+		c10 = su3[gauge_index*9+3].cast(LQCDConstants.complexTypeCompute);
+		c11 = su3[gauge_index*9+4].cast(LQCDConstants.complexTypeCompute);
+		c12 = su3[gauge_index*9+5].cast(LQCDConstants.complexTypeCompute);
+		c20 = su3[gauge_index*9+6].cast(LQCDConstants.complexTypeCompute);
+		c21 = su3[gauge_index*9+7].cast(LQCDConstants.complexTypeCompute);
+		c22 = su3[gauge_index*9+8].cast(LQCDConstants.complexTypeCompute);
 	}
 
 	/**

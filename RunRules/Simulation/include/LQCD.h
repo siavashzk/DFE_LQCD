@@ -13,7 +13,7 @@ extern "C" {
 #define LQCD_gCmdSize (128)
 #define LQCD_spCmdSize (128)
 #define LQCD_loopOffset (16)
-#define LQCD_numPipes (4)
+#define LQCD_numPipes (8)
 #define LQCD_PCIE_ALIGNMENT (16)
 
 

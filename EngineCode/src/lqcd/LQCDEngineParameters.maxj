@@ -26,12 +26,12 @@ public class LQCDEngineParameters extends EngineParameters {
 		declareParam(s_LZ,         DataType.INT, 8);
 		declareParam(s_LY,         DataType.INT, 8);
 		declareParam(s_LX,         DataType.INT, 16);
-		declareParam(s_numPipes,   DataType.INT, 4);
+		declareParam(s_numPipes,   DataType.INT, 8);
 		declareParam(s_loopOffset, DataType.INT, 16); // should divide LX*LY/2
 		declareParam(s_spCmdSize,  DataType.INT, 128);  // should divide LX*LY*LZ/2*24*4  /384
 		declareParam(s_gCmdSize,   DataType.INT, 128);  // should divide LX*LY*LZ/2*18*4*8/384
 
-		declareParam(s_frequency,  DataType.INT, 130);
+		declareParam(s_frequency,  DataType.INT, 150);
 		declareParam(s_effort,     Effort.class, Effort.HIGH);
 
 	}

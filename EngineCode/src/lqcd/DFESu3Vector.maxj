@@ -30,7 +30,7 @@ public class DFESu3Vector extends KernelLib {
 	protected DFESu3Vector(LQCDConstants constants) {
 		super(constants.getKernel());
 		m_constants = constants;
-		m_cplxType = LQCDConstants.complexType;
+		m_cplxType = LQCDConstants.complexTypeCompute;
 		c0 = m_cplxType.newInstance(constants.getKernel());
 		c1 = m_cplxType.newInstance(constants.getKernel());
 		c2 = m_cplxType.newInstance(constants.getKernel());
@@ -44,11 +44,11 @@ public class DFESu3Vector extends KernelLib {
 	protected DFESu3Vector(LQCDConstants constants, DFEVector<DFEComplex> su3vec) {
 		super(constants.getKernel());
 		m_constants = constants;
-		m_cplxType = LQCDConstants.complexType;
+		m_cplxType = LQCDConstants.complexTypeCompute;
 
-		c0 = su3vec[0];
-		c1 = su3vec[1];
-		c2 = su3vec[2];
+		c0 = su3vec[0].cast(m_cplxType);
+		c1 = su3vec[1].cast(m_cplxType);
+		c2 = su3vec[2].cast(m_cplxType);
 
 	}
 
@@ -56,12 +56,12 @@ public class DFESu3Vector extends KernelLib {
 	 * sets all the vector elements to zero
 	 */
 	protected void setZero() {
-		c0.setReal(     constant.var(LQCDConstants.realType,0));
-		c0.setImaginary(constant.var(LQCDConstants.realType,0));
-		c1.setReal(     constant.var(LQCDConstants.realType,0));
-		c1.setImaginary(constant.var(LQCDConstants.realType,0));
-		c2.setReal(     constant.var(LQCDConstants.realType,0));
-		c2.setImaginary(constant.var(LQCDConstants.realType,0));
+		c0.setReal(     constant.var(LQCDConstants.realTypeCompute,0));
+		c0.setImaginary(constant.var(LQCDConstants.realTypeCompute,0));
+		c1.setReal(     constant.var(LQCDConstants.realTypeCompute,0));
+		c1.setImaginary(constant.var(LQCDConstants.realTypeCompute,0));
+		c2.setReal(     constant.var(LQCDConstants.realTypeCompute,0));
+		c2.setImaginary(constant.var(LQCDConstants.realTypeCompute,0));
 	}
 
 	/**
@@ -221,9 +221,9 @@ public class DFESu3Vector extends KernelLib {
 		DFEVector<DFEComplex> result =
 			LQCDConstants.getVectoredSu3VectorType().newInstance(m_constants);
 
-		result[0]  <== c0;
-		result[1]  <== c1;
-		result[2]  <== c2;
+		result[0]  <== c0.cast(LQCDConstants.complexTypeCompute);
+		result[1]  <== c1.cast(LQCDConstants.complexTypeCompute);
+		result[2]  <== c2.cast(LQCDConstants.complexTypeCompute);
 
 		return result;
 	}

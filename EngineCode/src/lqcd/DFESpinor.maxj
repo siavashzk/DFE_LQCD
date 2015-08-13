@@ -43,21 +43,21 @@ public class DFESpinor extends KernelLib {
 		s2 = new DFESu3Vector (m_constants);
 		s3 = new DFESu3Vector (m_constants);
 
-		s0.c0 = in[0];
-		s0.c1 = in[1];
-		s0.c2 = in[2];
+		s0.c0 = in[0].cast(LQCDConstants.complexTypeCompute);
+		s0.c1 = in[1].cast(LQCDConstants.complexTypeCompute);;
+		s0.c2 = in[2].cast(LQCDConstants.complexTypeCompute);;
 
-		s1.c0 = in[3];
-		s1.c1 = in[4];
-		s1.c2 = in[5];
+		s1.c0 = in[3].cast(LQCDConstants.complexTypeCompute);;
+		s1.c1 = in[4].cast(LQCDConstants.complexTypeCompute);;
+		s1.c2 = in[5].cast(LQCDConstants.complexTypeCompute);;
 
-		s2.c0 = in[6];
-		s2.c1 = in[7];
-		s2.c2 = in[8];
+		s2.c0 = in[6].cast(LQCDConstants.complexTypeCompute);;
+		s2.c1 = in[7].cast(LQCDConstants.complexTypeCompute);;
+		s2.c2 = in[8].cast(LQCDConstants.complexTypeCompute);;
 
-		s3.c0 = in[9];
-		s3.c1 = in[10];
-		s3.c2 = in[11];
+		s3.c0 = in[9].cast(LQCDConstants.complexTypeCompute);;
+		s3.c1 = in[10].cast(LQCDConstants.complexTypeCompute);;
+		s3.c2 = in[11].cast(LQCDConstants.complexTypeCompute);;
 
 	}
 
@@ -162,18 +162,18 @@ public class DFESpinor extends KernelLib {
 		DFEVector<DFEComplex> result =
 			LQCDConstants.getVectoredSpinorType().newInstance(m_constants.getKernel());
 
-		result[0]  <== s0.c0;
-		result[1]  <== s0.c1;
-		result[2]  <== s0.c2;
-		result[3]  <== s1.c0;
-		result[4]  <== s1.c1;
-		result[5]  <== s1.c2;
-		result[6]  <== s2.c0;
-		result[7]  <== s2.c1;
-		result[8]  <== s2.c2;
-		result[9]  <== s3.c0;
-		result[10] <== s3.c1;
-		result[11] <== s3.c2;
+		result[0]  <== s0.c0.cast(LQCDConstants.complexTypeStore);
+		result[1]  <== s0.c1.cast(LQCDConstants.complexTypeStore);
+		result[2]  <== s0.c2.cast(LQCDConstants.complexTypeStore);
+		result[3]  <== s1.c0.cast(LQCDConstants.complexTypeStore);
+		result[4]  <== s1.c1.cast(LQCDConstants.complexTypeStore);
+		result[5]  <== s1.c2.cast(LQCDConstants.complexTypeStore);
+		result[6]  <== s2.c0.cast(LQCDConstants.complexTypeStore);
+		result[7]  <== s2.c1.cast(LQCDConstants.complexTypeStore);
+		result[8]  <== s2.c2.cast(LQCDConstants.complexTypeStore);
+		result[9]  <== s3.c0.cast(LQCDConstants.complexTypeStore);
+		result[10] <== s3.c1.cast(LQCDConstants.complexTypeStore);
+		result[11] <== s3.c2.cast(LQCDConstants.complexTypeStore);
 
 		return result;
 	}
